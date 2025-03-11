@@ -1,10 +1,10 @@
-<script lang="ts">
-  export const description = 'An inset sidebar with secondary navigation.'
-  export const iframeHeight = '800px'
+<script setup lang="ts">
+  const description = 'An inset sidebar with secondary navigation.'
+  const iframeHeight = '800px'
 </script>
 <template>
   <SidebarProvider>
-    <AppSidebar />
+    <AccountAppSidebar />
     <SidebarInset>
       <header class="flex gap-2 items-center h-16 shrink-0">
         <div class="flex gap-2 items-center px-4">

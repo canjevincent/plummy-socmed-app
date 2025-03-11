@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import {
     type SidebarProps,
-  } from './ui/sidebar'
+  } from '../ui/sidebar'
   import {
     BookOpen,
     Bot,
@@ -21,7 +21,7 @@
     user: {
       name: 'shadcn',
       email: 'm@example.com',
-      avatar: '/avatars/shadcn.jpg',
+      avatar: '', // /avatars/shadcn.jpg link
     },
     navMain: [
       {
@@ -148,12 +148,12 @@
         <SidebarMenuItem>
           <SidebarMenuButton size="lg" as-child>
             <a href="#">
-              <div class="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+              <div class="flex justify-center items-center rounded-lg aspect-square size-8 bg-sidebar-primary text-sidebar-primary-foreground">
                 <Command class="size-4" />
               </div>
-              <div class="grid flex-1 text-left text-sm leading-tight">
-                <span class="truncate font-semibold">Acme Inc</span>
-                <span class="truncate text-xs">Enterprise</span>
+              <div class="grid flex-1 text-sm leading-tight text-left">
+                <span class="font-semibold truncate">Acme Inc</span>
+                <span class="text-xs truncate">Enterprise</span>
               </div>
             </a>
           </SidebarMenuButton>
@@ -161,12 +161,12 @@
       </SidebarMenu>
     </SidebarHeader>
     <SidebarContent>
-      <NavMain :items="data.navMain" />
-      <NavProjects :projects="data.projects" />
-      <NavSecondary :items="data.navSecondary" class="mt-auto" />
+      <AccountNavMain :items="data.navMain" />
+      <AccountNavProjects :projects="data.projects" />
+      <AccountNavSecondary :items="data.navSecondary" class="mt-auto" />
     </SidebarContent>
     <SidebarFooter>
-      <NavUser :user="data.user" />
+      <AccountNavUser :user="data.user" />
     </SidebarFooter>
   </Sidebar>
 </template>

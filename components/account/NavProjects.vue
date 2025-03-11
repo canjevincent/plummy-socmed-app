@@ -1,9 +1,13 @@
 <script setup lang="ts">
   import {
     useSidebar
-  } from './ui/sidebar'
+  } from '../ui/sidebar'
   import {
-    type LucideIcon
+    Folder,
+    Forward,
+    type LucideIcon,
+    MoreHorizontal,
+    Trash2,
   } from 'lucide-vue-next'
   defineProps<{
     projects: {
