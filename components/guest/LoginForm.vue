@@ -11,7 +11,7 @@
                 Welcome back
               </h1>
               <p class="text-balance text-muted-foreground">
-                Login to your Acme Inc account
+                Login to your Plummy account
               </p>
             </div>
             <div class="grid gap-2">

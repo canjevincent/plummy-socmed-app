@@ -7,7 +7,9 @@ export default defineNuxtConfig({
     'shadcn-nuxt',
     '@nuxtjs/google-fonts',
     '@nuxt/icon',
-    '@nuxt/image'
+    '@nuxt/image',
+    'nuxt-auth-utils',
+    '@prisma/nuxt'
   ],
   shadcn: {
     /**
