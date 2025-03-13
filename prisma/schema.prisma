@@ -1,0 +1,100 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String @id @default(auto()) @map("_id") @db.ObjectId
+  email          String @unique
+  firstName      String
+  middleName     String
+  lastName       String
+  avatarUrl      String?
+  hashedPassword String?
+  role           String? @default("1")
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt 
+
+  // Embedded
+  followers      UserFollower[]
+  followed       UserFollow[]
+
+  // Relations
+  posts          Post[]
+  postComments   PostComment[] 
+  createdRoles   Role[]
+
+  // Unique Constraint
+  @@unique([firstName, middleName, lastName])
+}
+
+type UserFollower {
+  userId      String
+}
+
+type UserFollow {
+  userId String
+}
+
+model Role {
+  id            String @id @default(auto()) @map("_id") @db.ObjectId
+  title         String
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt 
+
+  // Embedded
+  permissions   Permission[]
+
+  // Relations
+  userId        String @db.ObjectId
+  user User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+type Permission {
+  authorization String
+}
+
+model Post {
+  id           String @id @default(auto()) @map("_id") @db.ObjectId    
+  content      String 
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt 
+
+  // Embedded
+  postImages   PostImage[]
+
+  // Relations
+  userId       String @db.ObjectId
+  user User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  postComments PostComment[]
+}
+
+type PostImage {
+  id     String
+  postId String 
+  url    String
+}
+
+model PostComment {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  comment   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt 
+
+  // Relations
+  postId    String @db.ObjectId
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  userId    String @db.ObjectId
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
