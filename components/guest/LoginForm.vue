@@ -74,9 +74,9 @@
             </div>
             <div class="text-sm text-center">
               Don&apos;t have an account?
-              <a href="#" class="underline underline-offset-4">
+              <NuxtLink href="/guest/auth/register" class="underline underline-offset-4">
                 Sign up
-              </a>
+              </NuxtLink>
             </div>
           </div>
         </form>

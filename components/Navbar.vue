@@ -39,7 +39,7 @@
           <a v-for="item in navigation" :key="item.name" :href="item.href" class="font-semibold text-gray-900 text-sm/6">{{ item.name }}</a>
         </div>
         <div class="hidden lg:flex lg:flex-1 lg:justify-end">
-          <NuxtLink to="guest/auth/login" class="font-semibold text-gray-900 text-sm/6">
+          <NuxtLink to="/guest/auth/login" class="font-semibold text-gray-900 text-sm/6">
             Log in 
             <span aria-hidden="true">&rarr;</span>
           </NuxtLink>

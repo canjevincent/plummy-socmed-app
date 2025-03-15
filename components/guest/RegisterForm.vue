@@ -1,49 +1,74 @@
 <script setup lang="ts">
+
+  type PAYLOAD = {
+    password: string
+    confirmPassword: string
+    email: string
+    firstName: string
+    middleName: string
+    lastName: string
+  }
+
+  const form = ref<PAYLOAD>({
+    password: '',
+    confirmPassword: '',
+    email: '',
+    firstName: '',
+    middleName: '',
+    lastName: ''
+  })
+
+  type APIError = {
+    data: {
+      data: {
+        errors: Record<string, string>;
+      };
+    };
+  };
+
+  const submitted = ref(false);
+  const errors = ref<Record<string, string>>({});
+
+  const onSubmit = async() => {
+    submitted.value = true;
+    try {
+      
+      await $fetch('/api/guest/auth/register', {
+        method: 'POST',
+        body: form.value
+      });
+
+      await navigateTo('/guest/auth/login');
+
+    } catch (error) {
+      if (error) {
+        console.log(error);
+        // Map API errors to the errors ref
+        const apiError = error as APIError;
+        errors.value = apiError.data.data.errors;
+
+      } else {
+        console.error("Register error:", error);
+      }
+    }
+  }
+
 </script>
 <template>
   <div class="flex flex-col gap-6">
-    <Card class="overflow-hidden">
-      <CardContent class="grid p-0 md:grid-cols-2">
-        <form class="p-6 md:p-8">
-          <div class="flex flex-col gap-6">
-            <div class="flex flex-col items-center text-center">
-              <h1 class="text-2xl font-bold">
-                Welcome back
-              </h1>
-              <p class="text-balance text-muted-foreground">
-                Login to your Acme Inc account
-              </p>
-            </div>
-            <div class="grid gap-2">
-              <Label for="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="m@example.com"
-                required
-              />
-            </div>
-            <div class="grid gap-2">
-              <div class="flex items-center">
-                <Label for="password">Password</Label>
-                <a
-                  href="#"
-                  class="ml-auto text-sm underline-offset-2 hover:underline"
-                >
-                  Forgot your password?
-                </a>
-              </div>
-              <Input id="password" type="password" required />
-            </div>
-            <Button type="submit" class="w-full">
-              Login
-            </Button>
-            <div class="relative text-sm text-center after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
-              <span class="relative z-10 px-2 bg-background text-muted-foreground">
-                Or continue with
-              </span>
-            </div>
-            <div class="grid grid-cols-3 gap-4">
+    <Card>
+      <CardHeader class="text-center">
+        <CardTitle class="text-xl">
+          Create an account
+        </CardTitle>
+        <CardDescription>
+          Register with your Apple or Google account
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+          <div class="grid gap-6">
+
+            <div class="flex flex-col gap-4">
               <Button variant="outline" class="w-full">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                   <path
@@ -51,7 +76,7 @@
                     fill="currentColor"
                   />
                 </svg>
-                <span class="sr-only">Login with Apple</span>
+                Login with Apple
               </Button>
               <Button variant="outline" class="w-full">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -60,36 +85,142 @@
                     fill="currentColor"
                   />
                 </svg>
-                <span class="sr-only">Login with Google</span>
+                Login with Google
               </Button>
-              <Button variant="outline" class="w-full">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                  <path
-                    d="M6.915 4.03c-1.968 0-3.683 1.28-4.871 3.113C.704 9.208 0 11.883 0 14.449c0 .706.07 1.369.21 1.973a6.624 6.624 0 0 0 .265.86 5.297 5.297 0 0 0 .371.761c.696 1.159 1.818 1.927 3.593 1.927 1.497 0 2.633-.671 3.965-2.444.76-1.012 1.144-1.626 2.663-4.32l.756-1.339.186-.325c.061.1.121.196.183.3l2.152 3.595c.724 1.21 1.665 2.556 2.47 3.314 1.046.987 1.992 1.22 3.06 1.22 1.075 0 1.876-.355 2.455-.843a3.743 3.743 0 0 0 .81-.973c.542-.939.861-2.127.861-3.745 0-2.72-.681-5.357-2.084-7.45-1.282-1.912-2.957-2.93-4.716-2.93-1.047 0-2.088.467-3.053 1.308-.652.57-1.257 1.29-1.82 2.05-.69-.875-1.335-1.547-1.958-2.056-1.182-.966-2.315-1.303-3.454-1.303zm10.16 2.053c1.147 0 2.188.758 2.992 1.999 1.132 1.748 1.647 4.195 1.647 6.4 0 1.548-.368 2.9-1.839 2.9-.58 0-1.027-.23-1.664-1.004-.496-.601-1.343-1.878-2.832-4.358l-.617-1.028a44.908 44.908 0 0 0-1.255-1.98c.07-.109.141-.224.211-.327 1.12-1.667 2.118-2.602 3.358-2.602zm-10.201.553c1.265 0 2.058.791 2.675 1.446.307.327.737.871 1.234 1.579l-1.02 1.566c-.757 1.163-1.882 3.017-2.837 4.338-1.191 1.649-1.81 1.817-2.486 1.817-.524 0-1.038-.237-1.383-.794-.263-.426-.464-1.13-.464-2.046 0-2.221.63-4.535 1.66-6.088.454-.687.964-1.226 1.533-1.533a2.264 2.264 0 0 1 1.088-.285z"
-                    fill="currentColor"
+            </div>
+            
+            <div class="relative text-sm text-center after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
+              <span class="relative z-10 px-2 bg-background text-muted-foreground">
+                Or register with
+              </span>
+            </div>
+            
+            <form @submit.prevent="onSubmit" action="">
+
+              <div class="grid gap-3">
+                
+                <div class="grid gap-2">
+                  <Label html-for="firstname">First Name</Label>
+                  <Input
+                    v-model="form.firstName"
+                    id="firstname"
+                    type="text"
+                    required
+                    :class="{ 
+                      'border-red-300 focus:border-red-600': errors.firstName && submitted,
+                      'border-green-300 focus:border-green-600': !errors.firstName && submitted
+                    }"
                   />
-                </svg>
-                <span class="sr-only">Login with Meta</span>
-              </Button>
-            </div>
+
+                  <span v-if="errors.firstName" class="text-sm text-red-500">
+                    {{ errors.firstName }}
+                  </span>
+                </div>
+
+                <div class="grid gap-2">
+                  <Label html-for="middlename">Middle Name</Label>
+                  <Input
+                    v-model="form.middleName"
+                    id="middlename"
+                    type="text"
+                    required
+                    :class="{ 
+                      'border-red-300 focus:border-red-600': errors.middleName && submitted,
+                      'border-green-300 focus:border-green-600': !errors.middleName && submitted 
+                    }"
+                  />
+                  <span v-if="errors.middleName" class="text-sm text-red-500">
+                    {{ errors.middleName }}
+                  </span>
+                </div>
+
+                <div class="grid gap-2">
+                  <Label html-for="lastname">Last Name</Label>
+                  <Input
+                    v-model="form.lastName"
+                    id="lastname"
+                    type="text"
+                    required
+                    :class="{ 
+                      'border-red-300 focus:border-red-600': errors.lastName && submitted, 
+                      'border-green-300 focus:border-green-600': !errors.lastName && submitted 
+                    }"
+                  />
+                  <span v-if="errors.lastName" class="text-sm text-red-500">
+                    {{ errors.lastName }}
+                  </span>
+                </div>
+
+                <div class="grid gap-2">
+                  <Label html-for="email">Email</Label>
+                  <Input
+                    v-model="form.email"
+                    id="email"
+                    type="email"
+                    required
+                    :class="{ 
+                      'border-red-300 focus:border-red-600': errors.email && submitted, 
+                      'border-green-300 focus:border-green-600': !errors.email && submitted 
+                    }"
+                  />
+                  <span v-if="errors.email" class="text-sm text-red-500">
+                    {{ errors.email }}
+                  </span>
+                </div>
+
+                <div class="grid gap-2">
+                  <Label html-for="password">Password</Label>
+                  <Input
+                    v-model="form.password" 
+                    id="password" 
+                    type="password" 
+                    required 
+                    :class="{ 
+                      'border-red-300 focus:border-red-600': errors.password && submitted, 
+                      'border-green-300 focus:border-green-600': !errors.password && submitted  
+                    }"
+                  />
+                  <span v-if="errors.password" class="text-sm text-red-500">
+                    {{ errors.password }}
+                  </span>
+                </div>
+
+                <div class="grid gap-2">
+                  <Label html-for="confirmPassword">Confirm Password</Label>
+                  <Input
+                    v-model="form.confirmPassword" 
+                    id="confirmPassword" 
+                    type="password" 
+                    required 
+                    :class="{ 
+                      'border-red-300 focus:border-red-600': errors.confirmPassword && submitted, 
+                      'border-green-300 focus:border-green-600': !errors.confirmPassword && submitted  
+                    }"
+                  />
+                  <span v-if="errors.confirmPassword" class="text-sm text-red-500">
+                    {{ errors.confirmPassword }}
+                  </span>
+                </div>
+
+                <Button type="submit" class="w-full">
+                  Register
+                </Button>
+                
+              </div>
+
+            </form>
+            
             <div class="text-sm text-center">
-              Don&apos;t have an account?
-              <a href="#" class="underline underline-offset-4">
-                Sign up
-              </a>
+              Already have an account?
+              <NuxtLink to="/guest/auth/login" class="underline underline-offset-4">
+                Sign in
+              </NuxtLink>
             </div>
+
           </div>
-        </form>
-        <div class="hidden relative bg-muted md:block">
-          <img
-            src="/placeholder.svg"
-            alt="Image"
-            class="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-          >
-        </div>
       </CardContent>
     </Card>
-    <div class="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary">
+    <div class="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 [&_a]:hover:text-primary">
       By clicking continue, you agree to our <a href="#">Terms of Service</a>
       and <a href="#">Privacy Policy</a>.
     </div>
