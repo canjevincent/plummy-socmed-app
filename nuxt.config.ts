@@ -9,7 +9,8 @@ export default defineNuxtConfig({
     '@nuxt/icon',
     '@nuxt/image',
     'nuxt-auth-utils',
-    '@prisma/nuxt'
+    '@prisma/nuxt',
+    '@hebilicious/vue-query-nuxt'
   ],
   shadcn: {
     /**

@@ -14,57 +14,66 @@
     Settings2,
     SquareTerminal,
   } from 'lucide-vue-next'
-  const props = withDefaults(defineProps<SidebarProps>(), {
+
+  // Combine AuthUserProps and SidebarProps into a single interface
+  interface AuthUserProps extends SidebarProps {
+    name: string;
+    email: string;
+    avatar: string;
+  }
+  
+  const props = withDefaults(defineProps<AuthUserProps>(), {
     variant: 'inset',
   })
+
   const data = {
     user: {
-      name: 'shadcn',
-      email: 'm@example.com',
-      avatar: '', // /avatars/shadcn.jpg link
+      name: props.name,
+      email: props.email,
+      avatar: props.avatar,
     },
     navMain: [
       {
-        title: 'Playground',
+        title: 'Dashboard',
         url: '#',
         icon: SquareTerminal,
         isActive: true,
         items: [
           {
-            title: 'History',
+            title: 'Posts',
             url: '#',
           },
           {
-            title: 'Starred',
+            title: 'Uploads',
             url: '#',
           },
           {
-            title: 'Settings',
+            title: 'Activities',
             url: '#',
           },
         ],
       },
       {
-        title: 'Models',
+        title: 'Accounts',
         url: '#',
         icon: Bot,
         items: [
           {
-            title: 'Genesis',
+            title: 'Users',
             url: '#',
           },
           {
-            title: 'Explorer',
+            title: 'Roles',
             url: '#',
           },
           {
-            title: 'Quantum',
+            title: 'Permissions',
             url: '#',
           },
         ],
       },
       {
-        title: 'Documentation',
+        title: 'Contents',
         url: '#',
         icon: BookOpen,
         items: [
@@ -152,8 +161,8 @@
                 <Command class="size-4" />
               </div>
               <div class="grid flex-1 text-sm leading-tight text-left">
-                <span class="font-semibold truncate">Acme Inc</span>
-                <span class="text-xs truncate">Enterprise</span>
+                <span class="font-semibold truncate">Plummy App</span>
+                <span class="text-xs truncate">Social Media</span>
               </div>
             </a>
           </SidebarMenuButton>

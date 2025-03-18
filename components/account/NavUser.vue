@@ -10,14 +10,26 @@
     LogOut,
     Sparkles,
   } from 'lucide-vue-next'
+
+  const { clear } = useUserSession();
+
+  interface AuthUserProps {
+    name: string
+    email: string
+    avatar: string
+  }
+
   const props = defineProps<{
-    user: {
-      name: string
-      email: string
-      avatar: string
-    }
+    user: AuthUserProps
   }>()
+  
   const { isMobile } = useSidebar()
+
+  const logout = async() => {
+    await clear();
+    navigateTo('/');
+  }
+
 </script>
 <template>
   <SidebarMenu>
@@ -84,7 +96,7 @@
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>
+          <DropdownMenuItem @click="logout">
             <LogOut />
             Log out
           </DropdownMenuItem>

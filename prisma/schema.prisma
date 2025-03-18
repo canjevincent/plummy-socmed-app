@@ -37,7 +37,7 @@ model User {
 }
 
 type UserFollower {
-  userId      String
+  userId String
 }
 
 type UserFollow {

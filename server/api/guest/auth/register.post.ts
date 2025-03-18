@@ -1,5 +1,5 @@
 import { sanitizeUser } from "~/server/utils/auth";
-import { authSchema } from "../../../utils/validations";
+import { authRegister } from "../../../utils/validations";
 import prisma from "~/lib/prisma";
 import { ZodError } from "zod";
 
@@ -16,7 +16,7 @@ const transformZodErrors = (zodError: ZodError) => {
 
 export default defineEventHandler(async (event) => {
   try {
-    const { email, password, firstName, middleName, lastName } = await readValidatedBody(event, (Body) => authSchema.parseAsync(Body));
+    const { email, password, firstName, middleName, lastName } = await readValidatedBody(event, (Body) => authRegister.parseAsync(Body));
 
     const hashedPassword = await hashPassword(password);
 

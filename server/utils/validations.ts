@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import prisma from "~/lib/prisma";
 
-export const authSchema = z.object({
+export const authRegister = z.object({
   email: z.string().email(),
   password: z.string().min(8),
   confirmPassword: z.string(),
@@ -22,4 +22,46 @@ export const authSchema = z.object({
 }, {
   message: "Email already exists",
   path: ["email"], // Associate the error with the `email` field
+});
+
+export const authLogin = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+}).refine(async (data) => {
+  // Check if the email exists in the database
+  const existingUser = await prisma.user.findUnique({
+    where: {
+      email: data.email,
+    },
+  });
+
+  // If the user does not exist, throw an error
+  if (!existingUser) {
+    return false;
+  }
+
+  // Return the user object for reuse in the next refinement
+  return existingUser;
+}, {
+  message: "Email does not exist.",
+  path: ["email"], // Associate the error with the `email` field
+}).refine(async (data) => {
+  // Reuse the existingUser from the previous refinement
+  const existingUser = await prisma.user.findUnique({
+    where: {
+      email: data.email,
+    },
+  });
+
+  // Ensure the user exists and has a hashed password
+  if (!existingUser || !existingUser.hashedPassword) {
+    return false;
+  }
+
+  // Verify the password
+  const isPasswordCorrect = await verifyPassword(existingUser.hashedPassword, data.password);
+  return isPasswordCorrect;
+}, {
+  message: "Email or password is incorrect.",
+  path: ["password"], // Associate the error with the `password` field
 });

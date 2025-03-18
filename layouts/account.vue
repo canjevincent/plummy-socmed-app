@@ -1,10 +1,14 @@
 <script setup lang="ts">
-  const description = 'An inset sidebar with secondary navigation.'
-  const iframeHeight = '800px'
+  // loggedIn, user, session, clear     
+  const { user } = useUserSession();
 </script>
 <template>
   <SidebarProvider>
-    <AccountAppSidebar />
+    <AccountAppSidebar
+      :name="`${user.firstName} ${user.middleName} ${user.lastName}`"
+      :email="user.email"
+      :avatar="user.avatar ? user.avatar : ''"
+    />
     <SidebarInset>
       <header class="flex gap-2 items-center h-16 shrink-0">
         <div class="flex gap-2 items-center px-4">
@@ -25,14 +29,7 @@
           </Breadcrumb>
         </div>
       </header>
-      <div class="flex flex-col flex-1 gap-4 p-4 pt-0">
-        <div class="grid auto-rows-min gap-4 md:grid-cols-3">
-          <div class="rounded-xl aspect-video bg-muted/50" />
-          <div class="rounded-xl aspect-video bg-muted/50" />
-          <div class="rounded-xl aspect-video bg-muted/50" />
-        </div>
-        <div class="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
-      </div>
+      <slot />
     </SidebarInset>
   </SidebarProvider>
 </template>

@@ -1,0 +1,157 @@
+# Run "bun x nuxi@latest init <project-name>"
+  ✔ Which package manager would you like to use? Bun
+
+# Install typescript as dependency
+  bun add -D typescript
+
+# Add Tailwind and its configuration
+  # Install @nuxtjs/tailwindcss module:
+      bun add --save-dev @nuxtjs/tailwindcss
+  # Add the module to the modules section of nuxt.config.{ts,js}:
+      export default defineNuxtConfig({
+        modules: [
+          '@nuxtjs/tailwindcss'
+        ]
+      })
+  # Create tailwind.config.js with the template below:
+      /** @type {import('tailwindcss').Config} */
+      export default {
+        content: [],
+        theme: {
+          extend: {},
+        },
+        plugins: [],
+      }
+  # Add this import header in your main css file, assets/css/tailwind.css in our case:
+      @tailwind base;
+      @tailwind components;
+      @tailwind utilities;
+
+      /* ... */
+  
+  # Make sure to setup paths in tailwind.config.js
+    content: [
+      "./components/**/*.{js,vue,ts}",
+      "./layouts/**/*.vue",
+      "./pages/**/*.vue",
+      "./plugins/**/*.{js,ts}",
+      "./app.vue",
+      "./error.vue",
+    ],
+      
+  # To use utility classes for theming set tailwind.cssVariables to "false" in your components.json
+  # To use CSS variables for theming set tailwind.cssVariables to "true" in your components.json file.
+
+# Add Nuxt modules
+  # Due to Nuxt auto-import feature, if you skip this step you will observe many warning in console.
+    bun x --bun nuxi@latest module add shadcn-nuxt
+  # Configure nuxt.config.ts
+    export default defineNuxtConfig({
+      modules: ['@nuxtjs/tailwindcss', 'shadcn-nuxt'],
+      shadcn: {
+        /**
+        * Prefix for all the imported component
+        */
+        prefix: '',
+        /**
+        * Directory that the component lives in.
+        * @default "./components/ui"
+        */
+        componentDir: './components/ui'
+      }
+    })
+
+# Run the CLI
+  # Run the shadcn-vue init command to setup your project:
+    bun x --bun shadcn-vue@latest init
+
+    √ Which style would you like to use? » Default
+    √ Which color would you like to use as the base color? » Neutral
+    √ Would you like to use CSS variables for theming? ... no / -yes
+
+# Add Nuxt Eslint
+  bun x nuxi module add eslint
+
+# Add Nuxt Google fonts
+  bun x nuxi@latest module add google-fonts
+
+# Add Nuxt Icons
+  bun x nuxi module add icon
+
+# Add Nuxt Image Optimization
+  bun x nuxi@latest module add image
+
+# Add Nuxt Auth Utils for User Authorization
+  npx nuxi@latest module add auth-utils
+
+  # Create auth.d.ts on the root of the folder with this setup
+
+    declare module '#auth-utils' {
+      // User interface will be depending on your schema
+      // Only set variables from your schema that is intended to use on the session
+      interface User {
+        id: string
+        firstName: string
+        middleName: string
+        lastName: string
+        avatarUrl:string
+        role: string
+        email: string
+        createdAt: string
+        followers: []
+        followed: []
+      }
+
+      interface UserSession {
+
+      }
+
+      interface SecureSessionData {
+
+      }
+    }
+  
+  # Refresh the session using this variables on your vue login form inside the script tag
+    // To set refresher variable
+    const { fetch: refreshSession } = useUserSession();
+    // To trigger refresh session
+    await refreshSession();
+
+  # Use github link as reference
+    https://github.com/atinux/nuxt-auth-utils?tab=readme-ov-file
+
+# Install Prisma
+  bun install @prisma/nuxt
+  # If prisma folder was not created then run
+  bun x prisma init
+
+  # After database setup connection between app and mongodb run the following
+    bun x prisma generate
+    bun x prisma db push
+
+# Install Zod, vee-validate, @vee-validate/zod for validation
+
+  bun add zod
+  bun add vee-validate
+  bun add @vee-validate/zod
+
+# Install Tanstack Query
+  bun i @hebilicious/vue-query-nuxt @tanstack/vue-query  
+
+  # Add to nuxt config
+  export default defineNuxtConfig({
+    modules: ["@hebilicious/vue-query-nuxt"]
+  })
+
+# How to push on github ?
+  # If new project
+    -git init
+    -git add .
+    -git commit -m "Initial commit"
+    -git remote add origin https://github.com/canjevincent/plummy-socmed-app.git
+    -git push origin master
+
+  # If existing project
+    -git add . if to add all new files or use name of the specific file
+    -git commit -m "Short description"
+    -git push origin master
