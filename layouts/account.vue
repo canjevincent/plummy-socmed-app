@@ -1,6 +1,12 @@
 <script setup lang="ts">
   // loggedIn, user, session, clear     
-  const { user } = useUserSession();
+  const { user, fetch: refreshSession } = useUserSession();
+
+  const onRefreshSession = async () => {
+    await refreshSession();
+    console.log("Check Parent Emit")
+  }
+
 </script>
 <template>
   <SidebarProvider>

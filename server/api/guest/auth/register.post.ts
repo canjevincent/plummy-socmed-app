@@ -1,5 +1,5 @@
 import { sanitizeUser } from "~/server/utils/auth";
-import { authRegister } from "../../../utils/validations";
+import { authRegister } from "../../../utils/validations/guest/authValidations";
 import prisma from "~/lib/prisma";
 import { ZodError } from "zod";
 

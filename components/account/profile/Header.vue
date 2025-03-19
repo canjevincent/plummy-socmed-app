@@ -1,4 +1,16 @@
 <script setup lang="ts">
+
+  interface UserAuthProps {
+    firstName: string
+    middleName: string
+    lastName: string
+    email: string
+  }
+
+  const props = defineProps<{
+    user: UserAuthProps
+  }>()
+
 </script>
 
 <template>   
@@ -10,8 +22,10 @@
           <div class="inline-flex absolute right-0 -bottom-2 items-center px-3 py-0.5 text-xs font-semibold rounded-full border border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-primary text-primary-foreground hover:bg-primary/80"> Author </div>
         </div>
         <div class="flex-1 text-center md:text-left">
-          <h2 class="mb-2 text-3xl font-bold">Sarah Johnson</h2>
-          <p class="mb-4 text-gray-600">Senior Technical Writer</p>
+          <h2 class="mb-2 text-3xl font-bold">{{ user.firstName }} {{ user.middleName }} {{ user.lastName }}</h2>
+          <p class="mb-4 text-gray-600">
+            {{ user.email }}
+          </p>
           <p class="mb-4 max-w-2xl text-gray-600">Passionate about explaining complex technical concepts in simple terms. 10+ years of experience in technical writing and developer advocacy.</p>
           <div class="flex flex-wrap gap-4 items-center">
             <span class="flex gap-2 items-center text-gray-600">

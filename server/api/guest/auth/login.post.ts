@@ -1,4 +1,4 @@
-import { authLogin } from "../../../utils/validations";
+import { authLogin } from "../../../utils/validations/guest/authValidations";
 import { ZodError } from "zod";
 import prisma from "~/lib/prisma";
 import { type User } from '@prisma/client';
