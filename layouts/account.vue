@@ -1,19 +1,20 @@
 <script setup lang="ts">
   // loggedIn, user, session, clear     
-  const { user, fetch: refreshSession } = useUserSession();
+  const { user } = useUserSession();
 
-  const onRefreshSession = async () => {
-    await refreshSession();
-    console.log("Check Parent Emit")
-  }
+  // Create a computed key that depends on name, email, and avatar
+  const userKey = computed(() => {
+    return `${user.value.firstName}-${user.value.middleName}-${user.value.lastName}-${user.value.email}-${user.value.avatarUrl}`;
+  });
 
 </script>
 <template>
   <SidebarProvider>
     <AccountAppSidebar
+      :key="userKey"
       :name="`${user.firstName} ${user.middleName} ${user.lastName}`"
       :email="user.email"
-      :avatar="user.avatar ? user.avatar : ''"
+      :avatar="user.avatarUrl ? user.avatarUrl : ''"
     />
     <SidebarInset>
       <header class="flex gap-2 items-center h-16 shrink-0">

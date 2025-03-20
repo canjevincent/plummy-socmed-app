@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
   if (session) {
 
     try {
-      const { email, firstName, middleName, lastName } = await readValidatedBody(event, (body) => settingsFormUpdate.parseAsync(body))
+      const { email, firstName, middleName, lastName, avatarUrl } = await readValidatedBody(event, (body) => settingsFormUpdate.parseAsync(body))
       const updateUser = await prisma.user.update({
         where: {
           id: session.user?.id
@@ -29,7 +29,8 @@ export default defineEventHandler(async (event) => {
           email,
           firstName,
           middleName,
-          lastName
+          lastName,
+          avatarUrl
         }
       });
 

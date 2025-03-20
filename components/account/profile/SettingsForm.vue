@@ -1,5 +1,6 @@
 <script setup lang="ts">
   import { useMutation } from '@tanstack/vue-query';
+  import { useSessionRefresh } from '~/composables/useSessionRefresh';
   import { useToast } from '~/components/ui/toast';
   
   const { toast } = useToast();
@@ -7,14 +8,15 @@
   // Refresh session
   const { fetch: refreshSession } = useUserSession();
 
-  // Define the emit function
-  const emit = defineEmits(['refreshSession']);
+  // Define the composable function
+  const { refreshSession: triggerGlobalRefresh } = useSessionRefresh();
   
   interface UserAuthProps {
     firstName: string
     middleName: string
     lastName: string
     email: string
+    avatarUrl: string
   }
   
   const props = defineProps<{
@@ -26,14 +28,15 @@
     middleName: string
     lastName: string
     email: string
-    // avatarUrl: String
+    avatarUrl: string  // Changed from String to string
   };
 
   const form = ref<SettingsType>({
     firstName: props.user.firstName,
     middleName: props.user.middleName,
     lastName: props.user.lastName,
-    email: props.user.email
+    email: props.user.email,
+    avatarUrl: props.user.avatarUrl
   });
 
   const isAlertModalVisible = ref(false);
@@ -64,7 +67,8 @@
       await refreshSession();
 
       // Emit the event to the parent component
-      emit('refreshSession');
+      await triggerGlobalRefresh();
+      
 
     },
     onError: (error: any) => {
@@ -91,6 +95,7 @@
 
     // Trigger the mutation
     updateProfile(form.value)
+  
   }
 
 </script>
@@ -174,7 +179,16 @@
 
         <div class="flex flex-col flex-1 gap-2">
           <Label for="profileImage">Profile Image</Label>
-          <Input id="profileImage" type="file"/>
+          <ImageUpload
+            @on-change="(url) => form.avatarUrl = url"
+            @on-remove="() => form.avatarUrl = ''"
+            :value="form.avatarUrl"
+          >
+          </ImageUpload>
+          
+          <span v-if="errors.avatarUrl" class="text-red-500">
+            {{ errors.avatarUrl }}
+          </span>
         </div>
 
         <div class="gap-2 basis-full">

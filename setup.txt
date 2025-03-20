@@ -143,6 +143,39 @@
     modules: ["@hebilicious/vue-query-nuxt"]
   })
 
+# Cloudinary for file upload
+  bun install cloudinary
+  bun install @nuxtjs/cloudinary
+  
+  # Add on the nuxt.config.ts modules
+    # place on the modules
+    export default defineNuxtConfig({
+      modules: ['@nuxtjs/cloudinary'],
+    })
+
+    # add object inside defineNuxtConfig
+    cloudinary: {
+      cloudName: process.env.NUXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+      uploadPreset: process.env.NUXT_PUBLIC_UPLOAD_PRESET,
+      apiKey: process.env.NUXT_CLOUDINARY_API_KEY,
+    },
+
+    # add object inside defineNuxtConfig
+    runtimeConfig: {
+      public: {
+        cloudinaryCloudName: '',
+        uploadPreset: ''
+      },
+      cloudinaryApiKey: '',
+      cloudinaryApiSecret: ''
+    }
+  
+  # Documentation https://cloudinary.nuxtjs.org/components/clduploadwidget
+    # or use
+      <CldUploadWidget v-slot="{ open }" uploadPreset="nuxt-cloudinary-unsigned">
+        <button type="button" @click="open">Upload an Image</button>
+      </CldUploadWidget>
+
 # How to push on github ?
   # If new project
     -git init
