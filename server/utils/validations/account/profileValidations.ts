@@ -6,6 +6,7 @@ export const settingsFormUpdate = z.object({
   firstName: z.string().min(3, {message: 'First name is requird with atleast 3 characters'}),
   middleName: z.string().min(1, {message: 'Middle name is requird with atleast 1 character'}),
   lastName: z.string().min(3, {message: 'Last name is requird with atleast 3 characters'}),
+  avatarUrl: z.string()
 }).refine(async (data) => {
   // Check if the email already exists in the database
   const existingUser = await prisma.user.findUnique({
@@ -18,3 +19,7 @@ export const settingsFormUpdate = z.object({
   message: "Email already exists",
   path: ["email"], // Associate the error with the `email` field
 });
+
+export const settingsImageUpdate = z.object({
+  avatarUrl: z.string()
+})

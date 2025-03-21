@@ -1,4 +1,4 @@
-import { settingsFormUpdate } from "~/server/utils/validations/account/profileValidations";
+import { settingsImageUpdate } from "~/server/utils/validations/account/profileValidations";
 import { ZodError } from "zod";
 import prisma from "~/lib/prisma";
 
@@ -20,16 +20,12 @@ export default defineEventHandler(async (event) => {
   if (session) {
 
     try {
-      const { email, firstName, middleName, lastName, avatarUrl } = await readValidatedBody(event, (body) => settingsFormUpdate.parseAsync(body))
+      const { avatarUrl } = await readValidatedBody(event, (body) => settingsImageUpdate.parseAsync(body))
       const updateUser = await prisma.user.update({
         where: {
           id: session.user?.id
         },
         data: {
-          email,
-          firstName,
-          middleName,
-          lastName,
           avatarUrl
         }
       });
@@ -38,10 +34,6 @@ export default defineEventHandler(async (event) => {
       await replaceUserSession(event, {
         user: {
           ...session.user,
-          email: updateUser.email,
-          firstName: updateUser.firstName,
-          middleName: updateUser.middleName,
-          lastName: updateUser.lastName,
           avatarUrl: updateUser.avatarUrl,
         }
       });

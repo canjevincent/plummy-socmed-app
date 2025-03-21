@@ -5,6 +5,7 @@
     middleName: string
     lastName: string
     email: string
+    avatarUrl: string
   }
 
   const props = defineProps<{
@@ -18,7 +19,7 @@
     <div class="mb-12">
       <div class="flex flex-col gap-8 items-center md:flex-row">
         <div class="relative">
-          <img src="https://shadcnblocks-vue.com/avatars/2.jpg" alt="Sarah Johnson" class="w-32 h-32 rounded-full border-4 border-primary/10">
+          <img :src="user.avatarUrl" alt="Sarah Johnson" class="w-32 h-32 rounded-full border-4 border-primary/10">
           <div class="inline-flex absolute right-0 -bottom-2 items-center px-3 py-0.5 text-xs font-semibold rounded-full border border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-primary text-primary-foreground hover:bg-primary/80"> Author </div>
         </div>
         <div class="flex-1 text-center md:text-left">
