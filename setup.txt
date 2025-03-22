@@ -69,6 +69,14 @@
     √ Which color would you like to use as the base color? » Neutral
     √ Would you like to use CSS variables for theming? ... no / -yes
 
+# Add DataTables from Shadcn Nuxt/Vue
+  
+  // Add Datatables
+  bun x --bun shadcn-vue@latest add table
+
+  // Add Tanstack/vue-table
+  bun add @tanstack/vue-table
+
 # Add Nuxt Eslint
   bun x nuxi module add eslint
 
@@ -176,9 +184,34 @@
         <button type="button" @click="open">Upload an Image</button>
       </CldUploadWidget>
 
-# Seeder
+# Prisma Seeder
+  # Rely on the official documentation https://www.prisma.io/docs/orm/prisma-migrate/workflows/seeding?utm_source=nuxt.com&utm_medium=aside-module&utm_campaign=nuxt.com
+  # If setup did not work check another option using tsx https://github.com/prisma/prisma/issues/7053
+  bun install -D typescript ts-node @types/node
 
+  # If documentation did not work then use tsx
+  bun install -D tsx
 
+  # Place inside package.json
+  {
+    "name": "my-project",
+    "version": "1.0.0",
+    "prisma": { // only use tsx if documentation did not work
+      "seed": "tsx prisma/seed.ts"
+    },
+    "devDependencies": { // add dependency not include in the file
+      "@types/node": "^14.14.21",
+      "ts-node": "^9.1.1",
+      "typescript": "^4.1.3"
+    }
+  }
+
+  # Install Faker Js
+  bun install @faker-js/faker --save-dev
+
+  # Seed Commands
+   // To run seed
+   bun x prisma db seed
 
 # How to push on github ?
   # If new project

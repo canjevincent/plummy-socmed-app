@@ -1,0 +1,438 @@
+TypeScript, being a superset of JavaScript, inherits all the array methods available in JavaScript. Below is a list of commonly used array methods in TypeScript, along with their purposes:
+1. Mutating Methods (Modify the original array)
+
+    .push(): Adds one or more elements to the end of an array.
+
+    .pop(): Removes the last element from an array and returns it.
+
+    .shift(): Removes the first element from an array and returns it.
+
+    .unshift(): Adds one or more elements to the beginning of an array.
+
+    .splice(): Adds or removes elements from an array at a specified index.
+
+    .reverse(): Reverses the order of elements in an array.
+
+    .sort(): Sorts the elements of an array (optionally with a compare function).
+
+2. Non-Mutating Methods (Return a new array or value)
+
+    .map(): Creates a new array by applying a function to each element.
+
+    .filter(): Creates a new array with elements that pass a test.
+
+    .reduce(): Reduces an array to a single value by applying a function.
+
+    .reduceRight(): Similar to .reduce(), but processes the array from right to left.
+
+    .concat(): Merges two or more arrays and returns a new array.
+
+    .slice(): Returns a shallow copy of a portion of an array.
+
+    .join(): Joins all elements of an array into a string.
+
+    .flat(): Flattens a nested array by a specified depth.
+
+    .flatMap(): Maps each element to a new array and flattens the result by one level.
+
+3. Search and Query Methods
+
+    .find(): Returns the first element that satisfies a condition.
+
+    .findIndex(): Returns the index of the first element that satisfies a condition.
+
+    .indexOf(): Returns the first index of a specified element (or -1 if not found).
+
+    .lastIndexOf(): Returns the last index of a specified element.
+
+    .includes(): Checks if an array contains a specific element (returns true or false).
+
+    .some(): Checks if at least one element satisfies a condition.
+
+    .every(): Checks if all elements satisfy a condition.
+
+4. Iteration Methods
+
+    .forEach(): Executes a function for each element in an array.
+
+    .entries(): Returns an iterator of key/value pairs for each index.
+
+    .keys(): Returns an iterator of array keys (indices).
+
+    .values(): Returns an iterator of array values.
+
+5. Utility Methods
+
+    .toString(): Converts an array to a string.
+
+    .toLocaleString(): Converts an array to a localized string.
+
+    .isArray() (static method): Checks if a value is an array.
+
+Here are practical examples for each of the best approaches when using MongoDB with Prisma. These examples demonstrate how to implement the recommendations in real-world scenarios.
+
+1. Prefer Embedded Documents
+  Embed related data directly within documents to avoid joins.
+
+  Example: User with Embedded Orders
+  Instead of having separate users and orders collections, embed the orders directly within the user document.
+
+Prisma Schema:
+
+  model User {
+    id    String @id @default(auto()) @map("_id") @db.ObjectId
+    name  String
+    email String @unique
+    orders Order[] // Embedded orders
+  }
+
+  model Order {
+    id     String @id @default(auto()) @map("_id") @db.ObjectId
+    product String
+    price  Float
+  }
+
+Insert Data:
+
+  await prisma.user.create({
+    data: {
+      name: "John Doe",
+      email: "john@example.com",
+      orders: {
+        create: [
+          { product: "Laptop", price: 1200 },
+          { product: "Phone", price: 800 },
+        ],
+      },
+    },
+  });
+
+Query Data:
+
+  const userWithOrders = await prisma.user.findUnique({
+    where: { email: "john@example.com" },
+    include: { orders: true },
+  });
+  console.log(userWithOrders);
+
+2. Use References Sparingly
+  Use references only when embedding is not feasible (e.g., due to data duplication or size constraints).
+
+  Example: User with Referenced Orders
+  Store orders in a separate collection and reference them from the user document.
+
+Prisma Schema:
+
+  model User {
+    id    String @id @default(auto()) @map("_id") @db.ObjectId
+    name  String
+    email String @unique
+    orders Order[] // Reference to orders
+  }
+
+  model Order {
+    id     String @id @default(auto()) @map("_id") @db.ObjectId
+    product String
+    price  Float
+    userId String @db.ObjectId
+    user   User   @relation(fields: [userId], references: [id])
+  }
+
+Insert Data:
+
+  const user = await prisma.user.create({
+    data: {
+      name: "Jane Doe",
+      email: "jane@example.com",
+    },
+  });
+
+  await prisma.order.create({
+    data: {
+      product: "Tablet",
+      price: 500,
+      userId: user.id,
+    },
+  });
+
+Query Data:
+
+  Fetch a user and their referenced orders:
+
+  const userWithOrders = await prisma.user.findUnique({
+    where: { email: "jane@example.com" },
+    include: { orders: true },
+  });
+  console.log(userWithOrders);
+
+3. Leverage Prisma's include
+  Use Prisma's include or select to fetch related data in a single query.
+
+  Example: Fetch User with Orders
+  Fetch a user and their orders (embedded or referenced) using include.
+
+Query:
+
+  const userWithOrders = await prisma.user.findUnique({
+    where: { email: "john@example.com" },
+    include: { orders: true },
+  });
+  console.log(userWithOrders);
+
+4. Avoid Complex Joins
+  Restructure data or consider a relational database if complex joins are required.
+
+  Example: Denormalize Data
+  If you need to frequently query orders with user details, denormalize the data by embedding user details in the order document.
+
+Prisma Schema:
+  model Order {
+    id     String @id @default(auto()) @map("_id") @db.ObjectId
+    product String
+    price  Float
+    userId String @db.ObjectId
+    userName String // Denormalized user name
+    userEmail String // Denormalized user email
+  }
+
+Insert Data:
+
+  const user = await prisma.user.create({
+    data: {
+      name: "Alice",
+      email: "alice@example.com",
+    },
+  });
+
+  await prisma.order.create({
+    data: {
+      product: "Monitor",
+      price: 300,
+      userId: user.id,
+      userName: user.name, // Denormalized
+      userEmail: user.email, // Denormalized
+    },
+  });
+
+Query Data:
+
+  Fetch orders with user details without joining:
+
+  const orders = await prisma.order.findMany({
+    where: { userEmail: "alice@example.com" },
+  });
+  console.log(orders);
+
+5. Use Specialized Collections Carefully
+  Use capped or time series collections only for specific use cases and manage them separately if needed.
+
+  Example: Capped Collection for Logs
+  Use a capped collection for logging, but manage it separately from Prisma.
+
+Create Capped Collection (Directly in MongoDB):
+
+  db.createCollection("logs", { capped: true, size: 100000, max: 1000 });
+
+Insert Logs (Directly in MongoDB):
+
+  db.logs.insertOne({ message: "User logged in", timestamp: new Date() });
+
+Query Logs (Directly in MongoDB):
+
+  db.logs.find().sort({ timestamp: -1 }).limit(10);
+
+Example: Time Series Collection for Metrics
+  Use a time series collection for metrics, but manage it separately from Prisma.
+
+Create Time Series Collection (Directly in MongoDB):
+
+  db.createCollection("metrics", {
+    timeseries: {
+      timeField: "timestamp",
+      metaField: "sensorId",
+      granularity: "hours",
+    },
+  });
+
+Insert Metrics (Directly in MongoDB):
+
+  db.metrics.insertOne({
+    sensorId: "sensor1",
+    timestamp: new Date(),
+    temperature: 25.5,
+  });
+
+Query Metrics (Directly in MongoDB):
+
+  db.metrics.find({ sensorId: "sensor1" }).sort({ timestamp: -1 }).limit(10);
+
+Summary of Examples
+Approach	Example
+Embedded Documents	Embed orders within user documents.
+References Sparingly	Reference orders from user documents.
+Leverage include	Fetch user and orders using include.
+Avoid Complex Joins	Denormalize user details into orders.
+Specialized Collections	Use capped collections for logs and time series collections for metrics.
+By following these examples, you can effectively use MongoDB with Prisma while adhering to best practices for schema design, querying, and data management.
+
+# Nuxt.js Rendering Lifecycle: In-Depth Explanation
+
+  Server-Side Rendering (SSR):
+  1. HTTP Request to the server
+  2. Nuxt server receives request
+  3. Vue app is instantiated on the server
+  4. asyncData/fetch hooks execute on the server
+  5. Page is rendered to HTML on the server
+  6. HTML is sent to browser with JS bundle
+  7. Browser displays HTML (First Contentful Paint)
+  8. Browser loads and executes JS bundle
+  9. Vue hydrates the static HTML into interactive app
+  10. Client-side hooks (mounted, etc.) execute
+
+  Client-Side Rendering (CSR):
+  1. HTTP Request to the server
+  2. Server sends minimal HTML shell with JS bundle
+  3. Browser displays loading state
+  4. Browser downloads and executes JS bundle
+  5. Vue app is instantiated in browser
+  6. API calls made to fetch data
+  7. Vue renders the complete page in browser
+  8. Client-side hooks (mounted, etc.) execute
+
+  Static Site Generation (SSG):
+  1. During build time, Nuxt pre-renders all pages to HTML
+  2. HTML, CSS, and JS are generated as static files
+  3. User requests page from static hosting
+  4. Pre-rendered HTML is delivered immediately
+  5. Browser loads and executes JS bundle
+  6. Vue hydrates the static HTML into interactive app
+  7. Client-side hooks (mounted, etc.) execute
+
+  Performance Implications
+
+  Server-Side Rendering (SSR)
+
+  Pros: Better SEO, faster First Contentful Paint, good for content-heavy pages
+  Cons: Higher server load, Time-to-Interactive may be delayed
+
+
+  Client-Side Rendering (CSR)
+
+  Pros: Lower server load, good for highly interactive apps
+  Cons: Poor SEO, slower initial load, blank page during JS loading
+
+
+  Static Site Generation (SSG)
+
+  Pros: Best performance, reduced hosting costs, excellent SEO
+  Cons: Build time increases with site size, dynamic content needs client-side fetching
+
+  Conclusion
+  Choosing the right rendering strategy in Nuxt depends on your specific use case:
+
+  Use SSR for content-focused pages needing SEO
+  Use CSR for highly interactive, authenticated experiences
+  Use SSG for relatively static content that doesn't change often
+  Consider hybrid approaches for the best balance
+
+  The Complete Rendering Flow
+  In Nuxt.js, the rendering lifecycle follows a specific sequence that differs based on the rendering mode. Let me explain the full journey from request to interactive page:
+  Full SSR Lifecycle (Server → Client)
+
+  Server Phase
+
+  User requests a page
+  Nuxt server receives the request
+  Vue app instance is created on the server
+  Server hooks execute: setup(), asyncData(), fetch()
+  Data is fetched and state is prepared on the server
+  Vue renders the HTML based on this state
+  HTML is generated along with needed JavaScript
+  HTML is sent to browser with JavaScript bundles and state serialized in window.__NUXT__
+
+
+  Client Phase (Hydration)
+
+  Browser receives and displays HTML immediately (fast initial render)
+  JavaScript bundles download and execute
+  Client-side Vue instance is created
+  Vue "hydrates" the static HTML by attaching event listeners and reactivity
+  Client hooks execute: onBeforeMount(), onMounted()
+  The page becomes fully interactive
+
+
+
+  This sequence ensures users see content quickly while the interactive elements initialize in the background.
+  Client-Side Rendering (CSR) Lifecycle
+  With CSR (when ssr: false):
+
+  Server sends a minimal HTML shell with JavaScript links
+  Browser shows a loading state (often blank)
+  JavaScript downloads and executes
+  Vue app initializes in the browser
+  Data fetching happens entirely client-side
+  Vue renders the DOM in the browser
+  Client lifecycle hooks execute
+
+# How the Server and Client Collaborate
+
+  The key to understanding Nuxt is recognizing that in SSR mode, code runs twice - once on the server and once on the client:
+  The crucial piece is the state serialization. After server rendering, Nuxt serializes all reactive state into window.__NUXT__ which is injected into the HTML. During client hydration, Vue uses this data to initialize with the same state that existed on the server.
+  Data Passing Between Server and Client
+  The primary mechanisms for passing data:
+
+  Auto-serialization: State from ref(), reactive(), and composables like useState() is automatically serialized
+  Nuxt payload: Data from useFetch() and other data fetching utilities is automatically included
+  Manual payload additions: You can add data via nuxtApp.payload on the server
+
+  // Adding custom data to payload
+  if (process.server) {
+    const nuxtApp = useNuxtApp()
+    nuxtApp.payload.customData = fetchSomethingOnServer()
+  }
+
+  // Using it on client
+  if (process.client) {
+    const nuxtApp = useNuxtApp()
+    console.log(nuxtApp.payload.customData)
+  }
+
+  Avoiding Hydration Mismatch Problems
+  Hydration mismatches are the most common rendering issues in Nuxt. These happen when the client-side render produces different HTML than the server did. Here's how to prevent them:
+  1. Understand Common Causes of Hydration Errors
+
+  Random values: Using Math.random() or Date.now() directly in templates
+  Browser-only objects: Accessing window, document, or navigator during render
+  Platform-specific code: Environment-dependent logic affecting the render
+  Reactive state initialization: Different initial state between server and client
+
+  Best Practices for Different Rendering Modes
+  Server-Side Rendering Best Practices
+
+  Keep initial payload small and focused
+  Use <ClientOnly> for interactive components with browser APIs
+  Keep component logic deterministic
+  Be careful with cookie/auth state management between server/client
+
+  Client-Side Rendering Best Practices
+
+  Add loading indicators for initial blank screen
+  Consider SEO implications and possibly add meta generators
+  Use preload directives for critical resources
+
+  Static Site Generation Best Practices
+
+  Use nuxi generate for full static builds
+  Consider incremental static regeneration for dynamic content
+  Set appropriate cache headers for static assets  
+
+  Conclusion
+  Understanding the rendering lifecycle in Nuxt is essential for building performant applications. Remember these key points:
+
+  In SSR mode, code execution happens twice - first on server, then on client
+  Hydration connects the server-rendered HTML with the client JavaScript
+  Keep components deterministic or use appropriate isolation techniques
+  Use the right rendering strategy for each section of your application
+  Follow best practices to avoid hydration mismatches
+
+  By mastering these concepts, you can create Nuxt applications that deliver both excellent user experience and search engine visibility while maintaining developer productivity.
