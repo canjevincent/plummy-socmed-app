@@ -277,6 +277,8 @@ By following these examples, you can effectively use MongoDB with Prisma while a
 
 # Nuxt.js Rendering Lifecycle: In-Depth Explanation
 
+  https://vuejs.org/guide/essentials/lifecycle.html
+
   Server-Side Rendering (SSR):
   1. HTTP Request to the server
   2. Nuxt server receives request
@@ -436,3 +438,4 @@ By following these examples, you can effectively use MongoDB with Prisma while a
   Follow best practices to avoid hydration mismatches
 
   By mastering these concepts, you can create Nuxt applications that deliver both excellent user experience and search engine visibility while maintaining developer productivity.
+

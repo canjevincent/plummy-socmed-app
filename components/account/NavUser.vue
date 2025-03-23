@@ -83,8 +83,10 @@
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem>
-              <BadgeCheck />
-              Account
+                <BadgeCheck />
+                <NuxtLink to="/account/profile/settings">
+                  Account
+                </NuxtLink>
             </DropdownMenuItem>
             <DropdownMenuItem>
               <CreditCard />

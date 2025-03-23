@@ -60,7 +60,7 @@
         items: [
           {
             title: 'Users',
-            url: '#',
+            url: '/account/accounts/users',
           },
           {
             title: 'Roles',
