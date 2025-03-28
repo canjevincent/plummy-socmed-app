@@ -1,6 +1,5 @@
 import { PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
-import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -13,7 +12,7 @@ async function main() {
     const firstName = faker.person.firstName();
     const lastName = faker.person.lastName();
     const email = faker.internet.email({ firstName, lastName });
-    const hashedPassword = await bcrypt.hash('password', 10); // Hash a default password
+    const hashedPassword = 'admin2025'; // Hash a default password
     const avatarUrl = faker.image.avatar();
 
     // Create a user and push the promise to the array

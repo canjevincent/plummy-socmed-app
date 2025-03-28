@@ -2,6 +2,12 @@ import { h } from 'vue'
 import type { ColumnDef } from '@tanstack/vue-table'
 import type { User } from '@prisma/client'
 import DropdownAction from './DataTableDropdown.vue'
+import DataTableColumnHeader from './DataTableColumnHeader.vue'
+
+// Define custom meta type to include emit function
+interface TableEmitMeta {
+  emit: (event: string, ...args: any[]) => void
+}
 
 export const columns: ColumnDef<User>[] = [
   {
@@ -10,15 +16,30 @@ export const columns: ColumnDef<User>[] = [
   },
   {
     accessorKey: 'email',
-    header: 'Email',
+    header: ({ column }) => (
+      h(DataTableColumnHeader, {
+          column: column,
+          title: 'Email'
+      })
+    ),
   },
   {
     accessorKey: 'firstName',
-    header: 'First Name',
+    header: ({ column }) => (
+      h(DataTableColumnHeader, {
+          column: column,
+          title: 'First Name'
+      })
+    ),
   },
   {
     accessorKey: 'lastName',
-    header: 'Last Name',
+    header: ({ column }) => (
+      h(DataTableColumnHeader, {
+          column: column,
+          title: 'Last Name'
+      })
+    ),
   },
   {
     accessorKey: 'role',
@@ -40,17 +61,39 @@ export const columns: ColumnDef<User>[] = [
   {
     id: 'actions',
     enableHiding: false,
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
       const user = row.original
-      return h('div', { class: 'relative' }, h(DropdownAction, {
-        user: {
-          id: user.id,
-          firstName: user.firstName ?? '',
-          middleName: user.middleName ?? '',
-          lastName: user.lastName ?? '',
-          email: user.email,
+      
+      // Create user object to pass to dropdown
+      const userData = {
+        id: user.id,
+        firstName: user.firstName ?? '',
+        middleName: user.middleName ?? '',
+        lastName: user.lastName ?? '',
+        email: user.email,
+      }
+
+      // Access meta data with proper type checking
+      const tableMeta = table.options.meta as TableEmitMeta | undefined
+      
+      return h(DropdownAction, {
+        user: userData,
+        onUpdate: (user) => {
+          if (tableMeta?.emit) {
+            tableMeta.emit('update-user', user)
+          }
         },
-      }))
+        onDelete: (user) => {
+          if (tableMeta?.emit) {
+            tableMeta.emit('delete-user', user)
+          }
+        },
+        onExpand: () => {
+          if (tableMeta?.emit) {
+            tableMeta.emit('expand')
+          }
+        }
+      })
     },
   },
 ]

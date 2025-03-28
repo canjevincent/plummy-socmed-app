@@ -3,7 +3,7 @@
   import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
   import { Button } from '@/components/ui/button'
 
-  defineProps<{
+  const props = defineProps<{
     user: {
       id: string
       firstName: string
@@ -13,11 +13,11 @@
     }
   }>()
 
-  defineEmits<{
+  const emit = defineEmits<{
     (e: 'expand'): void
+    (e: 'update', user: typeof props.user): void
+    (e: 'delete', user: typeof props.user): void
   }>()
-
-  const isUpdateModalVisible = ref(false);
 
 </script>
 
@@ -31,28 +31,18 @@
     </DropdownMenuTrigger>
     <DropdownMenuContent align="end">
       <DropdownMenuLabel>
-        Actions
+        Actions 
       </DropdownMenuLabel>
       <DropdownMenuSeparator />
       <DropdownMenuItem @click="$emit('expand')">
         Expand
       </DropdownMenuItem>
-      <DropdownMenuItem @click="isUpdateModalVisible = !isUpdateModalVisible">
+      <DropdownMenuItem @click="$emit('update', user)">
         Update
       </DropdownMenuItem>
-      <DropdownMenuItem>
+      <DropdownMenuItem @click="$emit('delete', user)">
         Delete
       </DropdownMenuItem>
     </DropdownMenuContent>
   </DropdownMenu>
-
-  <AccountAccountsUsersUpdateModal
-    title="Profile Update"
-    description="Are you sure you want to update your profile?"
-    v-if="isUpdateModalVisible"
-    :is-open="isUpdateModalVisible"
-    :user="user"  
-    @on-close="isUpdateModalVisible = !isUpdateModalVisible"
-  >
-  </AccountAccountsUsersUpdateModal>
 </template>

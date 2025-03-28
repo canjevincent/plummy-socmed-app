@@ -1,21 +1,12 @@
-<script lang="ts" setup>
+<script setup lang="ts">
   import { useToast } from '~/components/ui/toast';
 
   const { toast } = useToast();
-
-  interface UserProps {
-    id: string
-    firstName: string
-    middleName: string
-    lastName: string
-    email: string
-  }
 
   const props = defineProps<{
     isOpen: boolean
     title: string
     description: string
-    user: UserProps
   }>();
 
   type UserType = {
@@ -23,13 +14,13 @@
     middleName: string
     lastName: string
     email: string
-  };
+  }
 
   const form = ref<UserType>({
-    firstName: props.user.firstName,
-    middleName: props.user.middleName,
-    lastName: props.user.lastName,
-    email: props.user.email,
+    firstName: "",
+    middleName: "",
+    lastName: "",
+    email: ""
   });
 
   const isModalVisible = computed(() => props.isOpen);
@@ -38,25 +29,25 @@
   // Reactive error state
   const errors = ref<Record<string, string>>({});
 
-  // Update Form
-  const { mutate: updateUser, isPending: isUpdating } = useMutation({
+  // Create Form
+  const { mutate: createUser, isPending: isCreating } = useMutation({
     mutationFn: async (payload: UserType) => {
-      return await $fetch(`/api/account/accounts/users/${props.user.id}`, {
-        method: 'PATCH',
+      return await $fetch(`/api/account/accounts/users`, {
+        method: 'POST',
         body: payload,
       })
     },
-    onSuccess: async (updatedUser) => {
+    onSuccess: async (addedUser) => {
       
       toast({
         // variant: 'destructive',
-        title: 'Profile Update',
-        description: 'Your profile has been updated successfully.',
+        title: 'Account Created',
+        description: 'New account has been successfuly created.',
       });
 
       submitted.value = false;
       emit('onClose')
-      emit('onUpdate', updatedUser)
+      emit('onCreate', addedUser)
       
     },
     onError: (error: any) => {
@@ -66,27 +57,25 @@
         errors.value = error.data.data.errors;
       } else {
         // Handle generic errors
-        console.error('Registration error:', error);
+        console.error('New user error:', error);
         errors.value = { general: 'An unexpected error occurred. Please try again later.' };
       }
     }
   });
 
-  // Trigger Update Form
+  //Triger Create Form
   const onSubmit = () => {
-
-    // Set submitted to true
-    submitted.value = true;
+   // Set submitted to true
+   submitted.value = true
 
     // Clear previous errors
-    errors.value = {};
+   errors.value = {}; 
 
-    // Trigger the mutation
-    updateUser(form.value)
-
+   // Trigger the mutation
+   createUser(form.value)
   }
 
-  const emit = defineEmits(['onClose', 'onUpdate']);
+  const emit = defineEmits(['onClose', 'onCreate']);
 
 </script>
 
@@ -106,10 +95,10 @@
             v-model="form.firstName"
             id="firstName"
             type="text"
-            :disabled="isUpdating"
+            :disabled="isCreating"
             :class="{ 
-              'border-red-300 focus:border-red-600': errors.firstName && submitted && !isUpdating,
-              'border-green-300 focus:border-green-600': !errors.firstName && submitted && !isUpdating
+              'border-red-300 focus:border-red-600': errors.firstName && submitted && !isCreating,
+              'border-green-300 focus:border-green-600': !errors.firstName && submitted && !isCreating
             }"
           />
 
@@ -124,10 +113,10 @@
             v-model="form.middleName"
             id="middleName"
             type="text"
-            :disabled="isUpdating"
+            :disabled="isCreating"
             :class="{ 
-              'border-red-300 focus:border-red-600': errors.middleName && submitted && !isUpdating,
-              'border-green-300 focus:border-green-600': !errors.middleName && submitted && !isUpdating
+              'border-red-300 focus:border-red-600': errors.middleName && submitted && !isCreating,
+              'border-green-300 focus:border-green-600': !errors.middleName && submitted && !isCreating
             }"
           />
 
@@ -142,10 +131,10 @@
             v-model="form.lastName"
             id="lastName"
             type="text"
-            :disabled="isUpdating"
+            :disabled="isCreating"
             :class="{ 
-              'border-red-300 focus:border-red-600': errors.lastName && submitted && !isUpdating,
-              'border-green-300 focus:border-green-600': !errors.lastName && submitted && !isUpdating
+              'border-red-300 focus:border-red-600': errors.lastName && submitted && !isCreating,
+              'border-green-300 focus:border-green-600': !errors.lastName && submitted && !isCreating
             }"
           />
 
@@ -160,10 +149,10 @@
             v-model="form.email"
             id="email"
             type="email"
-            :disabled="isUpdating"
+            :disabled="isCreating"
             :class="{ 
-              'border-red-300 focus:border-red-600': errors.email && submitted && !isUpdating,
-              'border-green-300 focus:border-green-600': !errors.email && submitted && !isUpdating
+              'border-red-300 focus:border-red-600': errors.email && submitted && !isCreating,
+              'border-green-300 focus:border-green-600': !errors.email && submitted && !isCreating
             }"
           />
 
@@ -173,8 +162,8 @@
         </div>
 
         <div class="gap-2 space-x-2 basis-full">
-          <Button :disabled="isUpdating">
-            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" v-if="isUpdating" disabled>
+          <Button :disabled="isCreating">
+            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" v-if="isCreating" disabled>
               <circle cx="4" cy="12" r="3" fill="currentColor">
                 <animate id="svgSpinners3DotsScale0" attributeName="r" begin="0;svgSpinners3DotsScale1.end-0.25s" dur="0.75s" values="3;.2;3"></animate>
               </circle>
@@ -185,11 +174,11 @@
                 <animate id="svgSpinners3DotsScale1" attributeName="r" begin="svgSpinners3DotsScale0.end-0.45s" dur="0.75s" values="3;.2;3"></animate>
               </circle>
             </svg>
-            Update
+            Create
           </Button>
 
-          <Button type="button" variant="outline" @click="emit('onClose')" :disabled="isUpdating">
-            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" v-if="isUpdating" disabled>
+          <Button type="button" variant="outline" @click="emit('onClose')" :disabled="isCreating">
+            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" v-if="isCreating" disabled>
               <circle cx="4" cy="12" r="3" fill="currentColor">
                 <animate id="svgSpinners3DotsScale0" attributeName="r" begin="0;svgSpinners3DotsScale1.end-0.25s" dur="0.75s" values="3;.2;3"></animate>
               </circle>
