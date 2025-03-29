@@ -17,7 +17,7 @@
 </script>
 
 <template>
-  <div class="flex justify-between items-center">
+  <div class="flex justify-between items-center w-full">
     <div class="flex flex-1 items-center space-x-2">
       <DataTableFacetedFilter
         v-if="table.getColumn('role')"

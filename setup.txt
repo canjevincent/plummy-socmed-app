@@ -213,6 +213,15 @@
    // To run seed
    bun x prisma db seed
 
+# Install Vue Quill for text editor
+  bun install @vueup/vue-quill@latest --save
+
+# Install Vue Drag and drop
+  bun add vuedraggable
+
+  # use the reference
+  https://github.com/SortableJS/Vue.Draggable
+
 # How to push on github ?
   # If new project
     -git init

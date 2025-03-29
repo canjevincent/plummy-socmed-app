@@ -64,7 +64,7 @@
           },
           {
             title: 'Roles',
-            url: '#',
+            url: '/account/accounts/roles',
           },
           {
             title: 'Permissions',

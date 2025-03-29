@@ -12,6 +12,7 @@
 
   import DataTableToolBar from './DataTableToolBar.vue'
   import { valueUpdater } from '~/lib/utils'
+  import { useDebounce } from '@vueuse/core'
   
   // Define a type for searchable column configuration
   type SearchableColumn = {
@@ -48,7 +49,8 @@
   const columnFilters = ref<ColumnFiltersState>([])
 
   // Global search state
-  const globalFilter = ref('')
+  const rawGlobalFilter = ref('')
+  const globalFilter = useDebounce(rawGlobalFilter, 100)
 
   // Add emit definition to pass events up to parent
   const emit = defineEmits<{
@@ -97,22 +99,25 @@
 
 <template>
   
+  <div class="flex gap-x-3">
   
-  <!-- Search -->
-  <div class="flex items-center py-4">
-    <Input 
-      class="max-w-sm" 
-      placeholder="Search" 
-      :model-value="globalFilter"
-      @update:model-value="value => globalFilter = String(value)"
-    />
-  </div>
+    <!-- Search -->
+    <div class="flex items-center py-4 min-w-fit">
+      <Input 
+        class="min-w-sm" 
+        placeholder="Search" 
+        :model-value="rawGlobalFilter"
+        @update:model-value="value => rawGlobalFilter = String(value)"
+      />
+    </div>
 
-  <!-- Column Display -->
-  <DataTableToolBar :table="table" />
+    <!-- Column Display -->
+    <DataTableToolBar :table="table" />
+  
+  </div>
     
   <!-- Tabel -->
-  <div class="mt-5 rounded-md border">
+  <div class="rounded-md border">
     <Table>
 
       <TableHeader>
