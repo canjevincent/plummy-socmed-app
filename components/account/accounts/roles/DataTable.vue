@@ -1,123 +1,180 @@
-<script setup lang="ts" generic="TData">
-import type { ColumnDef } from '@tanstack/vue-table'
-import {
-  FlexRender,
-  getCoreRowModel,
-  useVueTable,
-} from '@tanstack/vue-table'
+<script setup lang="ts">
+  import DataTablePagination from './DataTablePagination.vue'
+  import DataTableToolbar from './DataTableToolbar.vue'
+  import { valueUpdater } from '~/lib/utils'
+  import type { User } from '@prisma/client'
 
-interface Props<TData> {
-  columns: ColumnDef<TData, any>[]
-  data: TData[]
-  loading?: boolean
-  totalPages?: number
-  currentPage?: number
-}
+  import type {
+    ColumnDef,
+    ColumnFiltersState,
+    SortingState,
+    VisibilityState,
+  } from '@tanstack/vue-table'
+  
+  import {
+    FlexRender,
+    getCoreRowModel,
+    getFacetedRowModel,
+    getFacetedUniqueValues,
+    getFilteredRowModel,
+    getPaginationRowModel,
+    getSortedRowModel,
+    useVueTable,
+  } from '@tanstack/vue-table'
 
-const props = withDefaults(defineProps<Props<any>>(), {
-  loading: false,
-  totalPages: 1,
-  currentPage: 1
-})
-
-const emit = defineEmits<{
-  (e: 'sort', column: string, direction: 'asc' | 'desc'): void
-  (e: 'page-change', page: number): void
-}>()
-
-const table = useVueTable({
-  get data() { return props.data },
-  get columns() { return props.columns },
-  getCoreRowModel: getCoreRowModel(),
-})
-
-const handleSort = (column: string, direction: 'asc' | 'desc') => {
-  emit('sort', column, direction)
-}
-
-const handlePageChange = (page: number) => {
-  if (page >= 1 && page <= props.totalPages) {
-    emit('page-change', page)
+  interface DataTableProps {
+    columns: ColumnDef<User, any>[]
+    data: User[]
+    totalCount: number
+    page: number
+    pageSize: number
+    sortBy: string
+    sortOrder: string
+    filters: Record<string, any>
+    loading: boolean
   }
-}
+
+  const props = defineProps<DataTableProps>()
+  const emit = defineEmits([
+    'update:page',
+    'update:page-size',
+    'update:sort',
+    'update:filters'
+  ])
+
+  const sorting = ref<SortingState>([{
+    id: props.sortBy,
+    desc: props.sortOrder === 'desc'
+  }])
+
+  const columnFilters = ref<ColumnFiltersState>(
+    Object.entries(props.filters).map(([id, value]) => ({
+      id,
+      value
+    }))
+  )
+
+  // Watch for props changes to update local state
+  watch(() => props.sortBy, (newSortBy) => {
+    if (sorting.value.length === 0 || sorting.value[0].id !== newSortBy) {
+      sorting.value = [{
+        id: newSortBy,
+        desc: props.sortOrder === 'desc'
+      }]
+    }
+  })
+
+  watch(() => props.sortOrder, (newSortOrder) => {
+    if (sorting.value.length > 0 && sorting.value[0].desc !== (newSortOrder === 'desc')) {
+      sorting.value = [{
+        id: sorting.value[0].id,
+        desc: newSortOrder === 'desc'
+      }]
+    }
+  })
+
+  const table = useVueTable({
+    get data() { return props.data },
+    get columns() { return props.columns },
+    get pageCount() { 
+      return Math.ceil(props.totalCount / props.pageSize) 
+    },
+    manualPagination: true,
+    manualSorting: true,
+    manualFiltering: true,
+    state: {
+      get pagination() {
+        return {
+          pageIndex: props.page - 1,
+          pageSize: props.pageSize
+        }
+      },
+      get sorting() { return sorting.value },
+      get columnFilters() { return columnFilters.value }
+    },
+    onPaginationChange: (updater) => {
+      const newState = updater({
+        pageIndex: props.page - 1,
+        pageSize: props.pageSize
+      })
+      emit('update:page', newState.pageIndex + 1)
+      emit('update:page-size', newState.pageSize)
+    },
+    onSortingChange: (updater) => {
+      // Handle both function and direct value updates
+      const newSorting = typeof updater === 'function' 
+        ? updater(sorting.value) 
+        : updater
+      
+      sorting.value = newSorting
+      
+      if (newSorting && newSorting.length > 0) {
+        emit('update:sort', {
+          sortBy: newSorting[0].id,
+          sortOrder: newSorting[0].desc ? 'desc' : 'asc'
+        })
+      } else {
+        // Default sort if sorting is cleared
+        emit('update:sort', {
+          sortBy: 'createdAt',
+          sortOrder: 'desc'
+        })
+      }
+    },
+    onColumnFiltersChange: (updater) => {
+      // Handle both function and direct value updates
+      const newFilters = typeof updater === 'function'
+        ? updater(columnFilters.value)
+        : updater
+        
+      columnFilters.value = newFilters
+      
+      const filters = Object.fromEntries(
+        newFilters.map(filter => [filter.id, filter.value])
+      )
+      emit('update:filters', filters)
+    },
+    getCoreRowModel: getCoreRowModel(),
+  })
 </script>
 
 <template>
   <div class="space-y-4">
+    <DataTableToolbar :table="table" />
     <div class="rounded-md border">
-      <div class="relative">
-        <Table>
-          <TableHeader>
-            <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
-              <TableHead v-for="header in headerGroup.headers" :key="header.id">
-                <FlexRender
-                  v-if="!header.isPlaceholder" 
-                  :render="header.column.columnDef.header"
-                  :props="header.getContext()"
-                />
-              </TableHead>
+      <Table>
+        <TableHeader>
+          <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
+            <TableHead v-for="header in headerGroup.headers" :key="header.id">
+              <FlexRender v-if="!header.isPlaceholder" :render="header.column.columnDef.header" :props="header.getContext()" />
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <template v-if="table.getRowModel().rows?.length">
+            <TableRow
+              v-for="row in table.getRowModel().rows"
+              :key="row.id"
+              :data-state="row.getIsSelected() && 'selected'"
+            >
+              <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
+                <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
+              </TableCell>
             </TableRow>
-          </TableHeader>
-          <TableBody>
-            <template v-if="loading">
-              <TableRow>
-                <TableCell :colspan="columns.length" class="h-24 text-center">
-                  <div class="flex gap-2 justify-center items-center">
-                    <span class="loading loading-spinner loading-sm"></span>
-                    Loading...
-                  </div>
-                </TableCell>
-              </TableRow>
-            </template>
-            <template v-else-if="table.getRowModel().rows?.length">
-              <TableRow
-                v-for="row in table.getRowModel().rows" 
-                :key="row.id"
-                :data-state="row.getIsSelected() ? 'selected' : undefined"
-              >
-                <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
-                  <FlexRender 
-                    :render="cell.column.columnDef.cell" 
-                    :props="cell.getContext()" 
-                  />
-                </TableCell>
-              </TableRow>
-            </template>
-            <template v-else>
-              <TableRow>
-                <TableCell :colspan="columns.length" class="h-24 text-center">
-                  No results found.
-                </TableCell>
-              </TableRow>
-            </template>
-          </TableBody>
-        </Table>
-      </div>
+          </template>
+
+          <TableRow v-else>
+            <TableCell
+              :colspan="columns.length"
+              class="h-24 text-center"
+            >
+              No results.
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
     </div>
 
-    <!-- Pagination -->
-    <div v-if="totalPages > 1" class="flex flex-col gap-4 justify-between items-center px-2 sm:flex-row">
-      <div class="text-sm text-muted-foreground">
-        Showing page {{ currentPage }} of {{ totalPages }}
-      </div>
-      <div class="flex items-center space-x-2">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          :disabled="currentPage === 1"
-          @click="handlePageChange(currentPage - 1)"
-        >
-          Previous
-        </Button>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          :disabled="currentPage === totalPages"
-          @click="handlePageChange(currentPage + 1)"
-        >
-          Next
-        </Button>
-      </div>
-    </div>
+    <DataTablePagination :table="table" />
   </div>
 </template>

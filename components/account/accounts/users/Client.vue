@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import { columns } from './column'
+  import { columns } from './columns'
   import DataTable from './DataTable.vue'
   import type { User } from '@prisma/client'
 
@@ -152,4 +152,4 @@
       @on-delete="handleDeleteUser"
    />
    
-</template>
+</template>./columns

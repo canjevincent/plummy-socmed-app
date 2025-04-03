@@ -1,92 +1,55 @@
+import { Prisma } from '@prisma/client'
 import prisma from "~/lib/prisma";
-import { z } from "zod";
-
-const orderByFields = [
-  'id',
-  'email',
-  'firstName',
-  'lastName',
-  'role',
-  'createdAt',
-  'updatedAt'
-] as const;
-
-const roleValues = [
-  'ADMIN',
-  'USER'
-] as const;
 
 export default defineEventHandler(async (event) => {
-  try {
-    const query = getQuery(event);
-
-    // Validate and parse query parameters
-    const querySchema = z.object({
-      page: z.coerce.number().int().positive().default(1),
-      pageSize: z.coerce.number().int().min(1).max(100).default(10),
-      sortColumn: z.enum(orderByFields).optional().default('createdAt'),
-      sortDirection: z.enum(['asc', 'desc']).optional().default('desc'),
-      search: z.string().optional(),
-      role: z.enum(roleValues).optional()
-    });
-
-    const parsedQuery = querySchema.parse(query);
-
-    // Build dynamic where clause for filtering
-    const whereClause: any = {};
-    
-    if (parsedQuery.search) {
-      whereClause.OR = [
-        { firstName: { contains: parsedQuery.search, mode: 'insensitive' } },
-        { lastName: { contains: parsedQuery.search, mode: 'insensitive' } },
-        { email: { contains: parsedQuery.search, mode: 'insensitive' } }
-      ];
-    }
-    
-    if (parsedQuery.role) {
-      whereClause.role = parsedQuery.role;
-    }
-
-    // Build dynamic orderBy clause
-    const orderBy = {
-      [parsedQuery.sortColumn]: parsedQuery.sortDirection
-    };
-
-    // Fetch total count for pagination
-    const [totalCount, users] = await Promise.all([
-      prisma.user.count({ where: whereClause }),
-      prisma.user.findMany({
-        where: whereClause,
-        orderBy,
-        skip: (parsedQuery.page - 1) * parsedQuery.pageSize,
-        take: parsedQuery.pageSize,
-        select: {
-          id: true,
-          email: true,
-          firstName: true,
-          lastName: true,
-          role: true,
-          createdAt: true,
-          updatedAt: true
-        }
-      })
-    ]);
-
-    return {
-      data: users,
-      meta: {
-        page: parsedQuery.page,
-        pageSize: parsedQuery.pageSize,
-        totalCount,
-        totalPages: Math.ceil(totalCount / parsedQuery.pageSize)
+  const query = getQuery(event);
+  
+  // Pagination
+  const page = Number(query.page) || 1;
+  const pageSize = Number(query.pageSize) || 10;
+  const skip = (page - 1) * pageSize;
+  
+  // Sorting
+  const sortBy = query.sortBy as string || 'createdAt';
+  const sortOrder = query.sortOrder as string || 'desc';
+  
+  // Filtering
+  const filters = query.filters ? JSON.parse(query.filters as string) : {};
+  
+  // Build where clause with proper typing
+  const where: Prisma.UserWhereInput = {};
+  
+  if (filters.email) where.email = { contains: filters.email };
+  if (filters.firstName) where.firstName = { contains: filters.firstName };
+  if (filters.lastName) where.lastName = { contains: filters.lastName };
+  if (filters.role) where.role = filters.role;
+  
+  // Get data and count
+  const [users, totalCount] = await Promise.all([
+    prisma.user.findMany({
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        email: true,
+        createdAt: true
+      },
+      where,
+      skip,
+      take: pageSize,
+      orderBy: {
+        [sortBy]: sortOrder
       }
-    };
-  } catch (error) {
-    console.error('Error fetching users:', error);
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Internal Server Error',
-      message: 'Failed to fetch users'
-    });
-  }
+    }),
+    prisma.user.count({ where })
+  ]);
+  
+  return {
+    data: users,
+    totalCount,
+    page,
+    pageSize,
+    totalPages: Math.ceil(totalCount / pageSize)
+  };
 });
