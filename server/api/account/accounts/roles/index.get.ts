@@ -15,14 +15,33 @@ export default defineEventHandler(async (event) => {
   
   // Filtering
   const filters = query.filters ? JSON.parse(query.filters as string) : {};
+  const globalSearch = query.search as string || '';
   
   // Build where clause with proper typing
   const where: Prisma.UserWhereInput = {};
   
-  if (filters.email) where.email = { contains: filters.email };
-  if (filters.firstName) where.firstName = { contains: filters.firstName };
-  if (filters.lastName) where.lastName = { contains: filters.lastName };
-  if (filters.role) where.role = filters.role;
+  // Apply individual filters
+  if (filters.email) where.email = { contains: filters.email, mode: 'insensitive' };
+  if (filters.firstName) where.firstName = { contains: filters.firstName, mode: 'insensitive' };
+  if (filters.lastName) where.lastName = { contains: filters.lastName, mode: 'insensitive' };
+  
+  // Handle role filter - can be array or single value
+  if (filters.role) {
+    if (Array.isArray(filters.role)) {
+      where.role = { in: filters.role };
+    } else {
+      where.role = filters.role;
+    }
+  }
+  
+  // Apply global search across multiple columns if provided
+  if (globalSearch) {
+    where.OR = [
+      { email: { contains: globalSearch, mode: 'insensitive' } },
+      { firstName: { contains: globalSearch, mode: 'insensitive' } },
+      { lastName: { contains: globalSearch, mode: 'insensitive' } }
+    ];
+  }
   
   // Get data and count
   const [users, totalCount] = await Promise.all([

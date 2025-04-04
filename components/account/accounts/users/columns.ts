@@ -1,7 +1,7 @@
 import { h } from 'vue'
 import type { ColumnDef } from '@tanstack/vue-table'
 import type { User } from '@prisma/client'
-import DropdownAction from './DataTableDropdown.vue'
+import DataTableRowActions from './DataTableRowActions.vue'
 import DataTableColumnHeader from './DataTableColumnHeader.vue'
 
 // Define custom meta type to include emit function
@@ -76,7 +76,7 @@ export const columns: ColumnDef<User>[] = [
       // Access meta data with proper type checking
       const tableMeta = table.options.meta as TableEmitMeta | undefined
       
-      return h(DropdownAction, {
+      return h(DataTableRowActions, {
         user: userData,
         onUpdate: (user) => {
           if (tableMeta?.emit) {

@@ -1,24 +1,17 @@
 <script setup lang="ts">
   import DataTablePagination from './DataTablePagination.vue'
   import DataTableToolbar from './DataTableToolbar.vue'
-  import { valueUpdater } from '~/lib/utils'
   import type { User } from '@prisma/client'
 
   import type {
     ColumnDef,
     ColumnFiltersState,
     SortingState,
-    VisibilityState,
   } from '@tanstack/vue-table'
   
   import {
     FlexRender,
     getCoreRowModel,
-    getFacetedRowModel,
-    getFacetedUniqueValues,
-    getFilteredRowModel,
-    getPaginationRowModel,
-    getSortedRowModel,
     useVueTable,
   } from '@tanstack/vue-table'
 
@@ -31,16 +24,21 @@
     sortBy: string
     sortOrder: string
     filters: Record<string, any>
+    globalSearch: string
     loading: boolean
   }
 
   const props = defineProps<DataTableProps>()
-  const emit = defineEmits([
-    'update:page',
-    'update:page-size',
-    'update:sort',
-    'update:filters'
-  ])
+  const emit = defineEmits<{
+    (e: 'expand'): void
+    (e: 'update-user', user: any): void
+    (e: 'delete-user', user: any): void
+    (e: 'update:page', page: number): void            // example with parameter
+    (e: 'update:page-size', size: number): void       // example with parameter
+    (e: 'update:sort', sort: any): void               // adjust 'any' to your actual type
+    (e: 'update:filters', filters: any): void         // adjust 'any' to your actual type
+    (e: 'update:globalSearch', search: string): void  // example with parameter
+  }>()
 
   const sorting = ref<SortingState>([{
     id: props.sortBy,
@@ -93,10 +91,14 @@
       get columnFilters() { return columnFilters.value }
     },
     onPaginationChange: (updater) => {
-      const newState = updater({
-        pageIndex: props.page - 1,
-        pageSize: props.pageSize
-      })
+      // Correctly handle both function and direct value updates, similar to how you handle sorting
+      const newState = typeof updater === 'function'
+        ? updater({
+            pageIndex: props.page - 1,
+            pageSize: props.pageSize
+          })
+        : updater
+        
       emit('update:page', newState.pageIndex + 1)
       emit('update:page-size', newState.pageSize)
     },
@@ -129,18 +131,46 @@
         
       columnFilters.value = newFilters
       
-      const filters = Object.fromEntries(
-        newFilters.map(filter => [filter.id, filter.value])
-      )
-      emit('update:filters', filters)
+      // Convert column filters to the format expected by the server
+      const filtersObject: Record<string, any> = {}
+      
+      newFilters.forEach(filter => {
+        // Handle array values (like from faceted filters)
+        if (Array.isArray(filter.value)) {
+          if (filter.value.length > 0) {
+            filtersObject[filter.id] = filter.value;
+          }
+        } else {
+          filtersObject[filter.id] = filter.value;
+        }
+      })
+      
+      emit('update:filters', filtersObject)
     },
     getCoreRowModel: getCoreRowModel(),
+    meta: {
+      emit // Make the emit function available in the table context
+    }
   })
+
+  function handleGlobalSearchUpdate(search: string) {
+    emit('update:globalSearch', search)
+  }
+
+  // Pass the update:filters event from the toolbar to parent
+  function handleFiltersUpdate(newFilters: Record<string, any>) {
+    emit('update:filters', newFilters)
+  }
 </script>
 
 <template>
   <div class="space-y-4">
-    <DataTableToolbar :table="table" />
+    <DataTableToolbar 
+      :table="table" 
+      :global-search="globalSearch"
+      @update:global-search="handleGlobalSearchUpdate"
+      @update:filters="handleFiltersUpdate"
+    />
     <div class="rounded-md border">
       <Table>
         <TableHeader>

@@ -1,49 +1,47 @@
 <script setup lang="ts">
-  import type { Row } from '@tanstack/vue-table'
-  import type { User } from '@prisma/client'
+  import { MoreHorizontal } from 'lucide-vue-next'
+  import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+  import { Button } from '@/components/ui/button'
 
-  import { labels } from './toolbar'
-  import { userSchema } from '~/types'
+  const props = defineProps<{
+    user: {
+      id: string
+      firstName: string
+      middleName: string
+      lastName: string
+      email: string
+    }
+  }>()
 
-  interface DataTableRowActionsProps {
-    row: Row<User>
-  }
-  
-  const props = defineProps<DataTableRowActionsProps>()
+  const emit = defineEmits<{
+    (e: 'expand'): void
+    (e: 'update', user: typeof props.user): void
+    (e: 'delete', user: typeof props.user): void
+  }>()
 
-  const task = computed(() => userSchema.parse(props.row.original))
 </script>
 
 <template>
   <DropdownMenu>
     <DropdownMenuTrigger as-child>
-      <Button
-        variant="ghost"
-        class="flex h-8 w-8 p-0 data-[state=open]:bg-muted"
-      >
-        <Icon name="lucide:ellipsis" class="w-4 h-4" />
+      <Button variant="ghost" class="p-0 w-8 h-8">
         <span class="sr-only">Open menu</span>
+        <MoreHorizontal class="w-4 h-4" />
       </Button>
     </DropdownMenuTrigger>
-    <DropdownMenuContent align="end" class="w-[160px]">
-      <DropdownMenuItem>Edit</DropdownMenuItem>
-      <DropdownMenuItem>Make a copy</DropdownMenuItem>
-      <DropdownMenuItem>Favorite</DropdownMenuItem>
+    <DropdownMenuContent align="end">
+      <DropdownMenuLabel>
+        Actions 
+      </DropdownMenuLabel>
       <DropdownMenuSeparator />
-      <DropdownMenuSub>
-        <DropdownMenuSubTrigger>Labels</DropdownMenuSubTrigger>
-        <DropdownMenuSubContent>
-          <!-- <DropdownMenuRadioGroup :value="task.label">
-            <DropdownMenuRadioItem v-for="label in labels" :key="label.value" :value="label.value">
-              {{ label.label }}
-            </DropdownMenuRadioItem>
-          </DropdownMenuRadioGroup> -->
-        </DropdownMenuSubContent>
-      </DropdownMenuSub>
-      <DropdownMenuSeparator />
-      <DropdownMenuItem>
+      <DropdownMenuItem @click="$emit('expand')">
+        Expand
+      </DropdownMenuItem>
+      <DropdownMenuItem @click="$emit('update', user)">
+        Update
+      </DropdownMenuItem>
+      <DropdownMenuItem @click="$emit('delete', user)">
         Delete
-        <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
       </DropdownMenuItem>
     </DropdownMenuContent>
   </DropdownMenu>

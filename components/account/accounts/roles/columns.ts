@@ -1,13 +1,14 @@
 import type { ColumnDef } from '@tanstack/vue-table'
 import type { User } from '@prisma/client'
 
-import { Badge } from '@/components/ui/badge'
-import { Checkbox } from '@/components/ui/checkbox'
-
 import { h } from 'vue'
-import { labels, priorities, statuses } from './toolbar'
 import DataTableColumnHeader from './DataTableColumnHeader.vue'
 import DataTableRowActions from './DataTableRowActions.vue'
+
+// Define custom meta type to include emit function
+interface TableEmitMeta {
+  emit: (event: string, ...args: any[]) => void
+}
 
 export const columns: ColumnDef<User>[] = [
   {
@@ -56,6 +57,44 @@ export const columns: ColumnDef<User>[] = [
       const dateValue = row.getValue('createdAt') as string
       const date = new Date(dateValue)
       return h('div', { class: 'text-sm' }, date.toLocaleDateString())
+    },
+  },
+  {
+    id: 'actions',
+    enableHiding: false,
+    cell: ({ row, table }) => {
+      const user = row.original
+      
+      // Create user object to pass to dropdown
+      const userData = {
+        id: user.id,
+        firstName: user.firstName ?? '',
+        middleName: user.middleName ?? '',
+        lastName: user.lastName ?? '',
+        email: user.email,
+      }
+
+      // Access meta data with proper type checking
+      const tableMeta = table.options.meta as TableEmitMeta | undefined
+      
+      return h(DataTableRowActions, {
+        user: userData,
+        onUpdate: (user) => {
+          if (tableMeta?.emit) {
+            tableMeta.emit('update-user', user)
+          }
+        },
+        onDelete: (user) => {
+          if (tableMeta?.emit) {
+            tableMeta.emit('delete-user', user)
+          }
+        },
+        onExpand: () => {
+          if (tableMeta?.emit) {
+            tableMeta.emit('expand')
+          }
+        }
+      })
     },
   },
 ]
