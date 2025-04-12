@@ -1,7 +1,22 @@
 <script setup lang="ts">
   import { columns } from './columns'
   import DataTable from './DataTable.vue'
+  import { useUsersTable } from '@/composables/useUsersTable'
   import type { User } from '@prisma/client'
+
+  const {
+    page,
+    pageSize,
+    sortBy,
+    sortOrder,
+    filters,
+    globalSearch,
+    tableData,
+    isLoading,
+    refresh,
+    setGlobalSearch,
+    resetPagination 
+  } = useUsersTable()
 
   // Props for create modal
   const props = defineProps<{
@@ -12,9 +27,16 @@
   const emit = defineEmits(['onCloseCreateModal']);
 
   // Handle newly created user
-  const handleCreateUser = (createdUser: User) => {
-    // Add the new user to the beginning of the data array
-    data.value = [createdUser, ...data.value]
+  const handleCreateUser = async (createdUser: User) => {
+    // Refresh the table data to include the new user
+    await refresh()
+
+    // Set the global search to the new user's email to filter the table
+    if (createdUser && createdUser.email) {
+      // Reset to first page and set search to the new user's email
+      resetPagination()
+      setGlobalSearch(createdUser.email)
+    }
   }
 
   //  Selected update modal types
@@ -41,16 +63,14 @@
   }
 
   // Handle user update
-  const handleUpdateUser = (updatedUser: typeof selectedUpdateUser.value) => {
+  const handleUpdateUser = async (updatedUser: typeof selectedUpdateUser.value) => {
     if (updatedUser) {
-      // Find the index of the user based on the id
-      const index = data.value.findIndex(user => user.id === updatedUser.id)
-      if (index !== -1) {
-        // Update the user data object, replace with the new update on user
-        const newData = [...data.value];
-        newData[index] = { ...newData[index], ...updatedUser };
-        data.value = newData;
-      }
+      // Refresh the table data to reflect the update
+      await refresh()
+
+      // Optionally set the global search to show the updated user
+      resetPagination()
+      setGlobalSearch(updatedUser.email)
     }
   }
   
@@ -77,47 +97,33 @@
   }
 
   // Handle user delete 
-  const handleDeleteUser = (deletedUser: typeof selectedDeleteUser.value) => {
+  const handleDeleteUser = async (deletedUser: typeof selectedDeleteUser.value) => {
     if (deletedUser) {
-      // Find the index of the user based on the id
-      const index = data.value.findIndex(user => user.id === deletedUser.id)
-      if (index !== -1) {
-        // Remove the user data object with the index of 'index'
-        const newData = [...data.value];
-        newData.splice(index, 1);  // Remove 1 element at the found index
-        data.value = newData;
-      }
+      // Refresh the table data to remove the deleted user
+      await refresh()
     }
   }
 
-  // Data Table Query
-  const { data: queryData, isLoading, error } = useQuery({
-    queryKey: ['users'],
-    queryFn: async () => {
-      const response = await fetch('/api/account/accounts/users');
-      if (!response.ok) throw new Error('Network response was not ok');
-      return response.json();
-    }
-  });
-
-  const data = ref<User[]>([]);
-  watch(() => queryData.value, (newVal) => {
-    if (newVal) data.value = newVal;
-  }, { immediate: true });
-  
 </script>
 
 <template>
-  
   <section class="container p-4 mt-5 bg-white rounded-md border border-gray-100 shadow-sm">
     <DataTable 
       :columns="columns" 
-      :data="data"
-      :searchable-columns="[
-        { accessorKey: 'email', displayName: 'Email' },
-        { accessorKey: 'firstName', displayName: 'First Name' },
-        { accessorKey: 'lastName', displayName: 'Last Name' }
-      ]"
+      :data="tableData?.data || []"
+      :total-count="tableData?.totalCount || 0"
+      :page="page"
+      :page-size="pageSize"
+      :sort-by="sortBy"
+      :sort-order="sortOrder"
+      :filters="filters"
+      :global-search="globalSearch"
+      :loading="isLoading"
+      @update:page="(newPage) => page = newPage"
+      @update:page-size="(newSize) => pageSize = newSize"
+      @update:sort="(newSort) => { sortBy = newSort.sortBy; sortOrder = newSort.sortOrder }"
+      @update:filters="(newFilters) => filters = newFilters"
+      @update:global-search="(search) => globalSearch = search"
       @update-user="openUpdateModal"  
       @delete-user="openDeleteModal"
     />
@@ -151,5 +157,5 @@
       @on-close="closeDeleteModal"
       @on-delete="handleDeleteUser"
    />
-   
+
 </template>

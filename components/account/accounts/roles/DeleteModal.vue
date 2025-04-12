@@ -5,10 +5,8 @@
 
   interface Props {
     isOpen: boolean;
-    user: { id: string,
-            firstName: string,
-            middleName: string,
-            lastName: string,
+    role: { id: string,
+            title: string,
           };
   }
 
@@ -16,22 +14,22 @@
 
   const isModalVisible = computed(() => props.isOpen);
 
-  const { mutate: deleteUser, isPending: isDeleting } = useMutation({
+  const { mutate: deleteRole, isPending: isDeleting } = useMutation({
     mutationFn: async () => {
-      return await $fetch(`/api/account/accounts/users/${props.user.id}`, {
+      return await $fetch(`/api/account/accounts/roles/${props.role.id}`, {
         method: 'DELETE',
       });
     },
-    onSuccess: async (deletedUser) => {
+    onSuccess: async (deletedRole) => {
       toast({
-        title: 'User Delete',
-        description: 'User has been deleted successfully.',
+        title: 'Role Delete',
+        description: 'Role has been deleted successfully.',
       });
 
       emit('onClose');
-      emit('onDelete', deletedUser);
+      emit('onDelete', deletedRole);
 
-      console.log("Check deleted user ", deletedUser)
+      console.log("Check deleted role ", deletedRole)
     },
     onError: (error: any) => {
       console.error('Deletion error:', error);
@@ -39,7 +37,7 @@
   });
 
   const onConfirm = () => {
-    deleteUser();
+    deleteRole();
   };
 
   const emit = defineEmits(['onClose', 'onDelete']);
@@ -48,8 +46,8 @@
 <template>
   <Modal
     :is-modal-visible="isModalVisible"
-    :title="`Account Termination : ${user.firstName} ${user.middleName} ${user.lastName}`"
-    description="User account will be deleted permanently."
+    :title="`Role Deletion : ${role.title}`"
+    description="Role will be deleted permanently."
     @on-close="emit('onClose')"
   >
     <div class="flex justify-end items-center pt-6 space-x-2 w-full">

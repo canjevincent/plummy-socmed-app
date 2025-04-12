@@ -1,10 +1,10 @@
 <script setup lang="ts">
   import type { Column } from '@tanstack/vue-table'
-  import type { User } from '@prisma/client'
+  import type { Role } from '@prisma/client'
   import { cn } from '@/lib/utils'
 
   interface DataTableColumnHeaderProps {
-    column: Column<User, any>
+    column: Column<Role, any>
     title: string
   }
 

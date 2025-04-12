@@ -24,6 +24,7 @@ export default defineEventHandler(async (event) => {
       data: {
         email,
         hashedPassword,
+        roleId:'67f628d466fee5445f017012',
         firstName,
         middleName,
         lastName,

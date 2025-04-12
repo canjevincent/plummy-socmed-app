@@ -1,8 +1,9 @@
-import { h } from 'vue'
 import type { ColumnDef } from '@tanstack/vue-table'
 import type { User } from '@prisma/client'
-import DataTableRowActions from './DataTableRowActions.vue'
+
+import { h } from 'vue'
 import DataTableColumnHeader from './DataTableColumnHeader.vue'
+import DataTableRowActions from './DataTableRowActions.vue'
 
 // Define custom meta type to include emit function
 interface TableEmitMeta {

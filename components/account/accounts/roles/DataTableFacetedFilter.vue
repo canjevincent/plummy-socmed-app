@@ -1,10 +1,11 @@
 <script setup lang="ts">
   import type { Column } from '@tanstack/vue-table'
-  import type { User } from '@prisma/client'
+  import type { Component } from 'vue'
+  import type { Role } from '@prisma/client'
   import { cn } from '@/lib/utils'
 
   interface DataTableFacetedFilter {
-    column?: Column<User, any>
+    column?: Column<Role, any>
     title?: string
     options: {
       label: string
@@ -16,50 +17,7 @@
   const props = defineProps<DataTableFacetedFilter>()
 
   const facets = computed(() => props.column?.getFacetedUniqueValues())
-  
-  // Get the current filter value from the column
-  const currentFilterValue = computed(() => {
-    const filterValue = props.column?.getFilterValue();
-    // Ensure filterValue is always an array
-    return (Array.isArray(filterValue) ? filterValue : filterValue ? [filterValue] : []) as string[];
-  });
-  
-  // Create a reactive selected values set based on the current filter
-  const selectedValues = ref(new Set(currentFilterValue.value));
-  
-  // Watch for changes in the column filter value
-  watch(() => props.column?.getFilterValue(), (newValue) => {
-    const values = Array.isArray(newValue) ? newValue : newValue ? [newValue] : [];
-    selectedValues.value = new Set(values as string[]);
-  });
-
-  function handleOptionSelect(option: { value: string, label: string }) {
-    const isSelected = selectedValues.value.has(option.value);
-    
-    // Create a new Set to ensure reactivity
-    const newSelectedValues = new Set(selectedValues.value);
-    
-    if (isSelected) {
-      newSelectedValues.delete(option.value);
-    } else {
-      newSelectedValues.add(option.value);
-    }
-    
-    // Update the local state
-    selectedValues.value = newSelectedValues;
-    
-    // Update the column filter
-    const filterValues = Array.from(newSelectedValues);
-    props.column?.setFilterValue(filterValues.length ? filterValues : undefined);
-
-    // Reset the page to 1 when filter changes
-    // props.column?.table?.setPageIndex(0)
-  }
-
-  function clearFilters() {
-    selectedValues.value = new Set();
-    props.column?.setFilterValue(undefined);
-  }
+  const selectedValues = computed(() => new Set(props.column?.getFilterValue() as string[]))
 </script>
 
 <template>
@@ -109,8 +67,21 @@
             <CommandItem
               v-for="option in options"
               :key="option.value"
-              :value="option.value"
-              @select="() => handleOptionSelect(option)"
+              :value="option"
+              @select="(e) => {
+                console.log(e.detail.value)
+                const isSelected = selectedValues.has(option.value)
+                if (isSelected) {
+                  selectedValues.delete(option.value)
+                }
+                else {
+                  selectedValues.add(option.value)
+                }
+                const filterValues = Array.from(selectedValues)
+                column?.setFilterValue(
+                  filterValues.length ? filterValues : undefined,
+                )
+              }"
             >
               <div
                 :class="cn(
@@ -134,9 +105,9 @@
             <CommandSeparator />
             <CommandGroup>
               <CommandItem
-                value="clear-filters"
+                :value="{ label: 'Clear filters' }"
                 class="justify-center text-center"
-                @select="clearFilters"
+                @select="column?.setFilterValue(undefined)"
               >
                 Clear filters
               </CommandItem>

@@ -68,7 +68,7 @@
           },
           {
             title: 'Permissions',
-            url: '#',
+            url: '/account/accounts/permissions',
           },
         ],
       },
@@ -157,7 +157,7 @@
         <SidebarMenuItem>
           <SidebarMenuButton size="lg" as-child>
             <a href="#">
-              <div class="flex justify-center items-center rounded-lg aspect-square size-8 bg-sidebar-primary text-sidebar-primary-foreground">
+              <div class="flex items-center justify-center rounded-lg aspect-square size-8 bg-sidebar-primary text-sidebar-primary-foreground">
                 <Command class="size-4" />
               </div>
               <div class="grid flex-1 text-sm leading-tight text-left">

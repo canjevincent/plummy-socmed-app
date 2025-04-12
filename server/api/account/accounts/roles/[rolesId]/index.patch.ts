@@ -1,4 +1,4 @@
-import { usersCreate } from "~/server/utils/validations/account/usersValidations";
+import { rolesUpdate } from "~/server/utils/validations/account/rolesValidations";
 import { ZodError } from "zod";
 import prisma from "~/lib/prisma";
 
@@ -17,32 +17,25 @@ export default defineEventHandler(async (event) => {
   await requireUserSession(event);
   const session = await getUserSession(event);
 
-  if(session.user) {
-
+  if(session.user){
+    
     try {
-      const { firstName, middleName, lastName, email } = await readValidatedBody(event, (body) => usersCreate.parseAsync(body));
-
-      const hashedPassword = await hashPassword('admin2025');
-
-      const user = await prisma.user.create({
+      const { title } = await readValidatedBody(event, (body) => rolesUpdate.parseAsync(body));
+      const role = await prisma.role.update({
+        where: {
+          id: event.context.params?.rolesId
+        },
         data: {
-          firstName: firstName,
-          middleName: middleName,
-          lastName: lastName,
-          email: email,
-          hashedPassword:hashedPassword
+          title: title,
         }
       });
-
-      return user;
+      
+      return role;
     } catch (error) {
-
       // Handle Zod validation errors
       if (error instanceof Error && 'data' in error && error.data instanceof ZodError) {
         const errors = transformZodErrors(error.data);
         
-        // console.log(errors)
-
         throw createError({
           statusCode: 400,
           statusMessage: "Validation failed",

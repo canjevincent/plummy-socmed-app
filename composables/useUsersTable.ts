@@ -27,7 +27,7 @@ export function useUsersTable() {
         search: globalSearch.value
       }).toString()
 
-      const response = await fetch(`/api/account/accounts/roles?${queryParams}`)
+      const response = await fetch(`/api/account/accounts/users?${queryParams}`)
       if (!response.ok) throw new Error('Network response was not ok')
       return response.json()
     },

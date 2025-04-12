@@ -4,19 +4,15 @@
   import { Button } from '@/components/ui/button'
 
   const props = defineProps<{
-    user: {
+    role: {
       id: string
-      firstName: string
-      middleName: string
-      lastName: string
-      email: string
+      title: string
     }
   }>()
 
   const emit = defineEmits<{
-    (e: 'expand'): void
-    (e: 'update', user: typeof props.user): void
-    (e: 'delete', user: typeof props.user): void
+    (e: 'update', role: typeof props.role): void
+    (e: 'delete', role: typeof props.role): void
   }>()
 
 </script>
@@ -34,13 +30,10 @@
         Actions 
       </DropdownMenuLabel>
       <DropdownMenuSeparator />
-      <DropdownMenuItem @click="$emit('expand')">
-        Expand
-      </DropdownMenuItem>
-      <DropdownMenuItem @click="$emit('update', user)">
+      <DropdownMenuItem @click="$emit('update', role)">
         Update
       </DropdownMenuItem>
-      <DropdownMenuItem @click="$emit('delete', user)">
+      <DropdownMenuItem @click="$emit('delete', role)">
         Delete
       </DropdownMenuItem>
     </DropdownMenuContent>

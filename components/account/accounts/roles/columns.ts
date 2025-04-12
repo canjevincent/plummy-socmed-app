@@ -1,54 +1,23 @@
-import type { ColumnDef } from '@tanstack/vue-table'
-import type { User } from '@prisma/client'
-
 import { h } from 'vue'
-import DataTableColumnHeader from './DataTableColumnHeader.vue'
+import type { ColumnDef } from '@tanstack/vue-table'
+import type { Role } from '@prisma/client'
 import DataTableRowActions from './DataTableRowActions.vue'
+import DataTableColumnHeader from './DataTableColumnHeader.vue'
 
 // Define custom meta type to include emit function
 interface TableEmitMeta {
   emit: (event: string, ...args: any[]) => void
 }
 
-export const columns: ColumnDef<User>[] = [
+export const columns: ColumnDef<Role>[] = [
   {
-    accessorKey: 'id',
-    header: 'ID',
-  },
-  {
-    accessorKey: 'email',
+    accessorKey: 'title',
     header: ({ column }) => (
       h(DataTableColumnHeader, {
           column: column,
-          title: 'Email'
+          title: 'Title'
       })
     ),
-  },
-  {
-    accessorKey: 'firstName',
-    header: ({ column }) => (
-      h(DataTableColumnHeader, {
-          column: column,
-          title: 'First Name'
-      })
-    ),
-  },
-  {
-    accessorKey: 'lastName',
-    header: ({ column }) => (
-      h(DataTableColumnHeader, {
-          column: column,
-          title: 'Last Name'
-      })
-    ),
-  },
-  {
-    accessorKey: 'role',
-    header: 'Role',
-    cell: ({ row }) => {
-      const role = row.getValue('role') as string | null
-      return h('div', { class: 'capitalize' }, role || '-')
-    },
   },
   {
     accessorKey: 'createdAt',
@@ -63,35 +32,27 @@ export const columns: ColumnDef<User>[] = [
     id: 'actions',
     enableHiding: false,
     cell: ({ row, table }) => {
-      const user = row.original
+      const role = row.original
       
-      // Create user object to pass to dropdown
-      const userData = {
-        id: user.id,
-        firstName: user.firstName ?? '',
-        middleName: user.middleName ?? '',
-        lastName: user.lastName ?? '',
-        email: user.email,
+      // Create role object to pass to dropdown
+      const roleData = {
+        id: role.id,
+        title: role.title 
       }
 
       // Access meta data with proper type checking
       const tableMeta = table.options.meta as TableEmitMeta | undefined
       
       return h(DataTableRowActions, {
-        user: userData,
-        onUpdate: (user) => {
+        role: roleData,
+        onUpdate: (role) => {
           if (tableMeta?.emit) {
-            tableMeta.emit('update-user', user)
+            tableMeta.emit('update-role', role)
           }
         },
-        onDelete: (user) => {
+        onDelete: (role) => {
           if (tableMeta?.emit) {
-            tableMeta.emit('delete-user', user)
-          }
-        },
-        onExpand: () => {
-          if (tableMeta?.emit) {
-            tableMeta.emit('expand')
+            tableMeta.emit('delete-role', role)
           }
         }
       })

@@ -27,7 +27,7 @@
           description="Authority, accountability, and collaboration, ensuring smooth workflows and effective goal achievement."
         />
         <Button @click="openCreateModal">
-          New User
+          New Role
         </Button>
       </div>
       <AccountAccountsRolesClient

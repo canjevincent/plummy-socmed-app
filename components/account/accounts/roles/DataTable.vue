@@ -1,210 +1,226 @@
-<script setup lang="ts">
-  import DataTablePagination from './DataTablePagination.vue'
-  import DataTableToolbar from './DataTableToolbar.vue'
-  import type { User } from '@prisma/client'
-
-  import type {
-    ColumnDef,
-    ColumnFiltersState,
-    SortingState,
-  } from '@tanstack/vue-table'
+<script setup lang="ts" generic="TData, TValue">
+  import type { ColumnDef, SortingState, ColumnFiltersState } from '@tanstack/vue-table'
   
   import {
     FlexRender,
     getCoreRowModel,
+    getPaginationRowModel,
     useVueTable,
+    getFilteredRowModel,
+    getSortedRowModel,
   } from '@tanstack/vue-table'
 
-  interface DataTableProps {
-    columns: ColumnDef<User, any>[]
-    data: User[]
-    totalCount: number
-    page: number
-    pageSize: number
-    sortBy: string
-    sortOrder: string
-    filters: Record<string, any>
-    globalSearch: string
-    loading: boolean
+  import DataTableToolBar from './DataTableToolBar.vue'
+  import { valueUpdater } from '~/lib/utils'
+  import { useDebounce } from '@vueuse/core'
+  
+  // Define a type for searchable column configuration
+  type SearchableColumn = {
+    accessorKey: string
+    displayName?: string
   }
 
-  const props = defineProps<DataTableProps>()
+  // Extend ColumnDef with optional accessorKey
+  type ExtendedColumnDef = ColumnDef<TData, TValue> & { 
+    accessorKey?: string 
+  }
+
+  const props = withDefaults(defineProps<{
+    columns: ExtendedColumnDef[]
+    data: TData[]
+    searchableColumns?: SearchableColumn[]
+  }>(), {
+    searchableColumns: () => []
+  })
+
+  // Compute searchable columns, falling back to columns with an accessor
+  const searchableColumns = computed(() => {
+    if (props.searchableColumns.length > 0) return props.searchableColumns
+
+    return props.columns
+      .filter((col): col is ExtendedColumnDef => !!col.accessorKey)
+      .map(col => ({ 
+        accessorKey: col.accessorKey!, 
+        displayName: col.header as string 
+      }))
+  })
+
+  const sorting = ref<SortingState>([])
+  const columnFilters = ref<ColumnFiltersState>([])
+
+  // Global search state
+  const rawGlobalFilter = ref('')
+  const globalFilter = useDebounce(rawGlobalFilter, 100)
+
+  // Add emit definition to pass events up to parent
   const emit = defineEmits<{
-    (e: 'expand'): void
-    (e: 'update-user', user: any): void
-    (e: 'delete-user', user: any): void
-    (e: 'update:page', page: number): void            // example with parameter
-    (e: 'update:page-size', size: number): void       // example with parameter
-    (e: 'update:sort', sort: any): void               // adjust 'any' to your actual type
-    (e: 'update:filters', filters: any): void         // adjust 'any' to your actual type
-    (e: 'update:globalSearch', search: string): void  // example with parameter
+    (e: 'update-role', role: any): void
+    (e: 'delete-role', role: any): void
   }>()
-
-  const sorting = ref<SortingState>([{
-    id: props.sortBy,
-    desc: props.sortOrder === 'desc'
-  }])
-
-  const columnFilters = ref<ColumnFiltersState>(
-    Object.entries(props.filters).map(([id, value]) => ({
-      id,
-      value
-    }))
-  )
-
-  // Watch for props changes to update local state
-  watch(() => props.sortBy, (newSortBy) => {
-    if (sorting.value.length === 0 || sorting.value[0].id !== newSortBy) {
-      sorting.value = [{
-        id: newSortBy,
-        desc: props.sortOrder === 'desc'
-      }]
-    }
-  })
-
-  watch(() => props.sortOrder, (newSortOrder) => {
-    if (sorting.value.length > 0 && sorting.value[0].desc !== (newSortOrder === 'desc')) {
-      sorting.value = [{
-        id: sorting.value[0].id,
-        desc: newSortOrder === 'desc'
-      }]
-    }
-  })
 
   const table = useVueTable({
     get data() { return props.data },
     get columns() { return props.columns },
-    get pageCount() { 
-      return Math.ceil(props.totalCount / props.pageSize) 
-    },
-    manualPagination: true,
-    manualSorting: true,
-    manualFiltering: true,
-    state: {
-      get pagination() {
-        return {
-          pageIndex: props.page - 1,
-          pageSize: props.pageSize
-        }
-      },
-      get sorting() { return sorting.value },
-      get columnFilters() { return columnFilters.value }
-    },
-    onPaginationChange: (updater) => {
-      // Correctly handle both function and direct value updates, similar to how you handle sorting
-      const newState = typeof updater === 'function'
-        ? updater({
-            pageIndex: props.page - 1,
-            pageSize: props.pageSize
-          })
-        : updater
-        
-      emit('update:page', newState.pageIndex + 1)
-      emit('update:page-size', newState.pageSize)
-    },
-    onSortingChange: (updater) => {
-      // Handle both function and direct value updates
-      const newSorting = typeof updater === 'function' 
-        ? updater(sorting.value) 
-        : updater
-      
-      sorting.value = newSorting
-      
-      if (newSorting && newSorting.length > 0) {
-        emit('update:sort', {
-          sortBy: newSorting[0].id,
-          sortOrder: newSorting[0].desc ? 'desc' : 'asc'
-        })
-      } else {
-        // Default sort if sorting is cleared
-        emit('update:sort', {
-          sortBy: 'createdAt',
-          sortOrder: 'desc'
-        })
-      }
-    },
-    onColumnFiltersChange: (updater) => {
-      // Handle both function and direct value updates
-      const newFilters = typeof updater === 'function'
-        ? updater(columnFilters.value)
-        : updater
-        
-      columnFilters.value = newFilters
-      
-      // Convert column filters to the format expected by the server
-      const filtersObject: Record<string, any> = {}
-      
-      newFilters.forEach(filter => {
-        // Handle array values (like from faceted filters)
-        if (Array.isArray(filter.value)) {
-          if (filter.value.length > 0) {
-            filtersObject[filter.id] = filter.value;
-          }
-        } else {
-          filtersObject[filter.id] = filter.value;
-        }
-      })
-      
-      emit('update:filters', filtersObject)
-    },
     getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    onSortingChange: updaterOrValue => valueUpdater(updaterOrValue, sorting),
+    onColumnFiltersChange: updaterOrValue => valueUpdater(updaterOrValue, columnFilters),
+    getFilteredRowModel: getFilteredRowModel(),
+    globalFilterFn: (row, columnId, value) => {
+      // Convert row values to string and check if they include the search term
+      const searchTerm = value.toLowerCase()
+      
+      // Filter and map to only searchable columns
+      return searchableColumns.value.some(col => {
+        const cellValue = row.getValue(col.accessorKey)
+        return cellValue != null && 
+               String(cellValue).toLowerCase().includes(searchTerm)
+      })
+    },
+    state: {
+      get sorting() { return sorting.value },
+      get columnFilters() { return columnFilters.value },
+      get globalFilter() { return globalFilter.value },
+    },
     meta: {
       emit // Make the emit function available in the table context
     }
   })
 
-  function handleGlobalSearchUpdate(search: string) {
-    emit('update:globalSearch', search)
-  }
+  const columns = computed(() => table.getAllColumns()
+  .filter(
+    column =>
+      typeof column.accessorFn !== 'undefined' && column.getCanHide(),
+  ))
 
-  // Pass the update:filters event from the toolbar to parent
-  function handleFiltersUpdate(newFilters: Record<string, any>) {
-    emit('update:filters', newFilters)
-  }
 </script>
 
 <template>
-  <div class="space-y-4">
-    <DataTableToolbar 
-      :table="table" 
-      :global-search="globalSearch"
-      @update:global-search="handleGlobalSearchUpdate"
-      @update:filters="handleFiltersUpdate"
-    />
-    <div class="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
-            <TableHead v-for="header in headerGroup.headers" :key="header.id">
-              <FlexRender v-if="!header.isPlaceholder" :render="header.column.columnDef.header" :props="header.getContext()" />
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <template v-if="table.getRowModel().rows?.length">
-            <TableRow
-              v-for="row in table.getRowModel().rows"
-              :key="row.id"
-              :data-state="row.getIsSelected() && 'selected'"
-            >
-              <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
-                <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
-              </TableCell>
-            </TableRow>
-          </template>
+  
+  <div class="flex gap-x-3">
+  
+    <!-- Search -->
+    <div class="flex items-center py-4 min-w-fit">
+      <Input 
+        class="min-w-sm" 
+        placeholder="Search" 
+        :model-value="rawGlobalFilter"
+        @update:model-value="value => rawGlobalFilter = String(value)"
+      />
+    </div>
 
-          <TableRow v-else>
-            <TableCell
-              :colspan="columns.length"
-              class="h-24 text-center"
-            >
+    <!-- Column Display -->
+    <DataTableToolBar :table="table" />
+  
+  </div>
+    
+  <!-- Tabel -->
+  <div class="border rounded-md">
+    <Table>
+
+      <TableHeader>
+        <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
+          <TableHead v-for="header in headerGroup.headers" :key="header.id">
+            <FlexRender
+              v-if="!header.isPlaceholder" :render="header.column.columnDef.header"
+              :props="header.getContext()"
+            />
+          </TableHead>
+        </TableRow>
+      </TableHeader>
+
+      <TableBody>
+        <template v-if="table.getRowModel().rows?.length">
+          <TableRow
+            v-for="row in table.getRowModel().rows" :key="row.id"
+            :data-state="row.getIsSelected() ? 'selected' : undefined"
+          >
+            <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
+              <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
+            </TableCell>
+          </TableRow>
+        </template>
+        <template v-else>
+          <TableRow>
+            <TableCell :colspan="columns.length" class="h-24 text-center">
               No results.
             </TableCell>
           </TableRow>
-        </TableBody>
-      </Table>
-    </div>
-
-    <DataTablePagination :table="table" />
+        </template>
+      </TableBody>
+      
+    </Table>
   </div>
+
+  <!-- Pagination -->
+  <div class="flex items-center justify-between px-2 mt-5">
+    <div class="flex-1 text-sm text-muted-foreground">
+      {{ table.getFilteredSelectedRowModel().rows.length }} of
+      {{ table.getFilteredRowModel().rows.length }} row(s) selected.
+    </div>
+    <div class="flex items-center space-x-6 lg:space-x-8">
+      <div class="flex items-center space-x-2">
+        <p class="text-sm font-medium">
+          Rows per page
+        </p>
+        <Select
+          :model-value="`${table.getState().pagination.pageSize}`"
+          @update:model-value="(value) => table.setPageSize(Number(value))"
+        >
+          <SelectTrigger class="h-8 w-[70px]">
+            <SelectValue :placeholder="`${table.getState().pagination.pageSize}`" />
+          </SelectTrigger>
+          <SelectContent side="top">
+            <SelectItem v-for="pageSize in [10, 20, 30, 40, 50]" :key="pageSize" :value="`${pageSize}`">
+              {{ pageSize }}
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div class="flex w-[100px] items-center justify-center text-sm font-medium">
+        Page {{ table.getState().pagination.pageIndex + 1 }} of
+        {{ table.getPageCount() }}
+      </div>
+      <div class="flex items-center space-x-2">
+        <Button
+          variant="outline"
+          class="hidden w-8 h-8 p-0 lg:flex"
+          :disabled="!table.getCanPreviousPage()"
+          @click="table.setPageIndex(0)"
+        >
+          <span class="sr-only">Go to first page</span>
+          <Icon name="lucide:chevrons-left" class="w-4 h-4" />
+        </Button>
+        <Button
+          variant="outline"
+          class="w-8 h-8 p-0"
+          :disabled="!table.getCanPreviousPage()"
+          @click="table.previousPage()"
+        >
+          <span class="sr-only">Go to previous page</span>
+          <Icon name="lucide:circle-chevron-left" class="w-4 h-4" />
+        </Button>
+        <Button
+          variant="outline"
+          class="w-8 h-8 p-0"
+          :disabled="!table.getCanNextPage()"
+          @click="table.nextPage()"
+        >
+          <span class="sr-only">Go to next page</span>
+          <Icon name="lucide:circle-chevron-right" class="w-4 h-4" />
+        </Button>
+        <Button
+          variant="outline"
+          class="hidden w-8 h-8 p-0 lg:flex"
+          :disabled="!table.getCanNextPage()"
+          @click="table.setPageIndex(table.getPageCount() - 1)"
+        >
+          <span class="sr-only">Go to last page</span>
+          <Icon name="lucide:chevrons-right" class="w-4 h-4" />
+        </Button>
+      </div>
+    </div>
+  </div>
+
 </template>

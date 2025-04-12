@@ -17,10 +17,10 @@
       :avatar="user.avatarUrl ? user.avatarUrl : ''"
     />
     <SidebarInset>
-      <header class="flex gap-2 items-center h-16 shrink-0">
-        <div class="flex gap-2 items-center px-4">
+      <header class="flex items-center h-16 gap-2 shrink-0">
+        <div class="flex items-center gap-2 px-4">
           <SidebarTrigger class="-ml-1" />
-          <Separator orientation="vertical" class="mr-2 h-4" />
+          <Separator orientation="vertical" class="h-4 mr-2" />
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem class="hidden md:block">

@@ -27,7 +27,6 @@
     "@vee-validate/zod": "^4.15.0",
     "@vueup/vue-quill": "^1.2.0",
     "@vueuse/core": "^12.8.2",
-    "bcrypt": "^5.1.1",
     "class-variance-authority": "^0.7.1",
     "cloudinary": "^2.6.0",
     "clsx": "^2.1.1",
@@ -42,7 +41,7 @@
     "vue": "^3.5.13",
     "vue-router": "^4.5.0",
     "vue3-lottie": "^3.3.1",
-    "vuedraggable": "^2.24.3",
+    "vuedraggable": "^4.1.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {

@@ -212,12 +212,19 @@
   # Seed Commands
    // To run seed
    bun x prisma db seed
+  
+  # Seed Steps
+
+    # 1 - seed seedRoles 
+    # 2 - change roleId on the seedUsers to available roles id in mongodb
+    # 3 - seed seedUsers
+    # 4 - change createdByid to existing user id in mongodb
 
 # Install Vue Quill for text editor
   bun install @vueup/vue-quill@latest --save
 
 # Install Vue Drag and drop
-  bun add vuedraggable
+  bun add vuedraggable@next
 
   # use the reference
   https://github.com/SortableJS/Vue.Draggable

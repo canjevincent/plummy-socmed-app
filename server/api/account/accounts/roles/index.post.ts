@@ -1,4 +1,4 @@
-import { usersCreate } from "~/server/utils/validations/account/usersValidations";
+import { rolesCreate } from "~/server/utils/validations/account/rolesValidations";
 import { ZodError } from "zod";
 import prisma from "~/lib/prisma";
 
@@ -15,28 +15,36 @@ const transformZodErrors = (zodError: ZodError) => {
 
 export default defineEventHandler(async (event) => {
   await requireUserSession(event);
-  const session = await getUserSession(event);
+  const session = await requireUserSession(event);
 
-  if(session.user) {
+  if (session.user) {
 
     try {
-      const { firstName, middleName, lastName, email } = await readValidatedBody(event, (body) => usersCreate.parseAsync(body));
 
-      const hashedPassword = await hashPassword('admin2025');
+      const { title } = await readValidatedBody(event, (body) => rolesCreate.parseAsync(body));
 
-      const user = await prisma.user.create({
-        data: {
-          firstName: firstName,
-          middleName: middleName,
-          lastName: lastName,
-          email: email,
-          hashedPassword:hashedPassword
+      const getNewPosition = await prisma.role.findMany({
+        orderBy: {
+          position: 'desc'
+        },
+        take: 1,
+        select: {
+          position: true
         }
       });
 
-      return user;
-    } catch (error) {
+      const role = await prisma.role.create({
+        data: {
+          title: title,
+          createdById: session.user.id,
+          position: (getNewPosition[0]?.position ?? 0) + 1,
+        }
+      });
 
+      return role;
+
+    } catch (error) {
+      
       // Handle Zod validation errors
       if (error instanceof Error && 'data' in error && error.data instanceof ZodError) {
         const errors = transformZodErrors(error.data);
@@ -55,13 +63,14 @@ export default defineEventHandler(async (event) => {
         statusCode: 500,
         statusMessage: "An unexpected error occurred. Please try again later.",
       });
+
     }
 
   } else {
     throw createError({
       statusCode: 401,
-      statusMessage: 'Unauthorized'
-    })
+      statusMessage: "Unauthorized",
+    });
   }
 
 });

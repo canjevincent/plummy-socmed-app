@@ -36,3 +36,8 @@ export const usersUpdate = z.object({
   message: "Email already exists",
   path: ["email"], // Associate the error with the `email` field
 });
+
+export const userRoleUpdate = z.object({
+  userId: z.string().min(3, {message: 'User is required with atleast 1 character'}),
+  newRoleId: z.string().min(3, {message: 'New role id is required with atleast 1 character'})
+});

@@ -1,9 +1,9 @@
 <script setup lang="ts">
   import type { Table } from '@tanstack/vue-table'
-  import type { User } from '@prisma/client'
+  import type { Role } from '@prisma/client'
 
   interface DataTableViewOptionsProps {
-    table: Table<User>
+    table: Table<Role>
   }
 
   const props = defineProps<DataTableViewOptionsProps>()
@@ -21,9 +21,9 @@
       <Button
         variant="outline"
         size="sm"
-        class="hidden ml-auto h-8 lg:flex"
+        class="hidden h-8 ml-auto lg:flex"
       >
-        <Icon name="lucide:settings-2" class="mr-2 w-4 h-4" />
+        <Icon name="lucide:settings-2" class="w-4 h-4 mr-2" />
         View
       </Button>
     </DropdownMenuTrigger>

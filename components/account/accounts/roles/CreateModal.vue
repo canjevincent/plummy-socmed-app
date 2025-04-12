@@ -9,18 +9,12 @@
     description: string
   }>();
 
-  type UserType = {
-    firstName: string
-    middleName: string
-    lastName: string
-    email: string
+  type RoleType = {
+    title: string
   }
 
-  const form = ref<UserType>({
-    firstName: "",
-    middleName: "",
-    lastName: "",
-    email: ""
+  const form = ref<RoleType>({
+    title: "",
   });
 
   const isModalVisible = computed(() => props.isOpen);
@@ -30,14 +24,14 @@
   const errors = ref<Record<string, string>>({});
 
   // Create Form
-  const { mutate: createUser, isPending: isCreating } = useMutation({
-    mutationFn: async (payload: UserType) => {
-      return await $fetch(`/api/account/accounts/users`, {
+  const { mutate: createRole, isPending: isCreating } = useMutation({
+    mutationFn: async (payload: RoleType) => {
+      return await $fetch(`/api/account/accounts/roles`, {
         method: 'POST',
         body: payload,
       })
     },
-    onSuccess: async (addedUser) => {
+    onSuccess: async (addedRole) => {
       
       toast({
         // variant: 'destructive',
@@ -47,7 +41,7 @@
 
       submitted.value = false;
       emit('onClose')
-      emit('onCreate', addedUser)
+      emit('onCreate', addedRole)
       
     },
     onError: (error: any) => {
@@ -57,7 +51,7 @@
         errors.value = error.data.data.errors;
       } else {
         // Handle generic errors
-        console.error('New user error:', error);
+        console.error('New role error:', error);
         errors.value = { general: 'An unexpected error occurred. Please try again later.' };
       }
     }
@@ -72,7 +66,7 @@
    errors.value = {}; 
 
    // Trigger the mutation
-   createUser(form.value)
+   createRole(form.value)
   }
 
   const emit = defineEmits(['onClose', 'onCreate']);
@@ -89,75 +83,21 @@
     <form @submit.prevent="onSubmit" action="">
       <div class="flex flex-wrap gap-5">
         
-        <div class="flex flex-col flex-1 gap-2">
-          <Label for="firstName">First Name</Label>
-          <Input
-            v-model="form.firstName"
-            id="firstName"
-            type="text"
-            :disabled="isCreating"
-            :class="{ 
-              'border-red-300 focus:border-red-600': errors.firstName && submitted && !isCreating,
-              'border-green-300 focus:border-green-600': !errors.firstName && submitted && !isCreating
-            }"
-          />
-
-          <span v-if="errors.firstName" class="text-red-500">
-            {{ errors.firstName }}
-          </span>
-        </div>
-
-        <div class="flex flex-col flex-1 gap-2">
-          <Label for="middleName">Middle Name</Label>
-          <Input
-            v-model="form.middleName"
-            id="middleName"
-            type="text"
-            :disabled="isCreating"
-            :class="{ 
-              'border-red-300 focus:border-red-600': errors.middleName && submitted && !isCreating,
-              'border-green-300 focus:border-green-600': !errors.middleName && submitted && !isCreating
-            }"
-          />
-
-          <span v-if="errors.middleName" class="text-red-500">
-            {{ errors.middleName }}
-          </span>
-        </div>
-
-        <div class="flex flex-col flex-1 gap-2">
-          <Label for="lastName">Last Name</Label>
-          <Input
-            v-model="form.lastName"
-            id="lastName"
-            type="text"
-            :disabled="isCreating"
-            :class="{ 
-              'border-red-300 focus:border-red-600': errors.lastName && submitted && !isCreating,
-              'border-green-300 focus:border-green-600': !errors.lastName && submitted && !isCreating
-            }"
-          />
-
-          <span v-if="errors.lastName" class="text-red-500">
-            {{ errors.lastName }}
-          </span>
-        </div>
-
         <div class="flex flex-col gap-2 basis-full">
-          <Label for="email">Email</Label>
+          <Label for="title">Title</Label>
           <Input
-            v-model="form.email"
-            id="email"
-            type="email"
+            v-model="form.title"
+            id="title"
+            type="text"
             :disabled="isCreating"
             :class="{ 
-              'border-red-300 focus:border-red-600': errors.email && submitted && !isCreating,
-              'border-green-300 focus:border-green-600': !errors.email && submitted && !isCreating
+              'border-red-300 focus:border-red-600': errors.title && submitted && !isCreating,
+              'border-green-300 focus:border-green-600': !errors.title && submitted && !isCreating
             }"
           />
 
-          <span v-if="errors.email" class="text-red-500">
-            {{ errors.email }}
+          <span v-if="errors.title" class="text-red-500">
+            {{ errors.title }}
           </span>
         </div>
 
