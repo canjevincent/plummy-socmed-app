@@ -213,12 +213,12 @@
             </div>
           </div>
         </form>
-        <div class="hidden relative bg-muted md:block">
-          <img
+        <div class="relative hidden bg-muted md:block">
+          <NuxtImg
             src="" 
             alt="Image"
             class="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-          >
+          />
         </div>
       </CardContent>
     </Card>

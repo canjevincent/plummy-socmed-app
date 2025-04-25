@@ -2,8 +2,19 @@
   import type { Table } from '@tanstack/vue-table'
   import type { Role } from '@prisma/client'
 
+  interface RoleTable {
+    id: string;
+    title: string;
+    createdAt: Date;
+    createdBy: {
+      firstName: string | null;
+      middleName: string | null;
+      lastName: string | null;
+    };
+  }
+
   interface DataTableViewOptionsProps {
-    table: Table<Role>
+    table: Table<RoleTable>
   }
 
   const props = defineProps<DataTableViewOptionsProps>()

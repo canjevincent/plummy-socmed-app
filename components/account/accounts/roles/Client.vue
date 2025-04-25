@@ -3,6 +3,17 @@
   import DataTable from './DataTable.vue'
   import type { Role } from '@prisma/client'
 
+  interface RoleTable {
+    id: string;
+    title: string;
+    createdAt: Date;
+    createdBy: {
+      firstName: string | null;
+      middleName: string | null;
+      lastName: string | null;
+    };
+  }
+
   // Props for create modal
   const props = defineProps<{
     isCreateModalVisible: boolean
@@ -12,7 +23,7 @@
   const emit = defineEmits(['onCloseCreateModal']);
 
   // Handle newly created role
-  const handleCreateRole = (createdRole: Role) => {
+  const handleCreateRole = (createdRole: RoleTable) => {
     // Add the new role to the beginning of the data array
     data.value = [createdRole, ...data.value]
   }
@@ -95,7 +106,7 @@
     }
   });
 
-  const data = ref<Role[]>([]);
+  const data = ref<RoleTable[]>([]);
   watch(() => queryData.value, (newVal) => {
     if (newVal) data.value = newVal;
   }, { immediate: true });
@@ -110,6 +121,7 @@
       :data="data"
       :searchable-columns="[
         { accessorKey: 'title', displayName: 'Title' },
+        { id: 'createdBy', displayName: 'Created By' },
       ]"
       @update-role="openUpdateModal"  
       @delete-role="openDeleteModal"

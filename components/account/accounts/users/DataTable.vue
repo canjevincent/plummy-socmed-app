@@ -15,9 +15,22 @@
     useVueTable,
   } from '@tanstack/vue-table'
 
+  interface UserTable {
+    id: string;
+    firstName: string | null;
+    middleName: string | null;
+    lastName: string | null;
+    roleId: string;
+    email: string;
+    createdAt: Date;
+    role: {
+      title: string;
+    };
+  }
+
   interface DataTableProps {
-    columns: ColumnDef<User, any>[]
-    data: User[]
+    columns: ColumnDef<UserTable, any>[]
+    data: UserTable[]
     totalCount: number
     page: number
     pageSize: number
@@ -171,7 +184,7 @@
       @update:global-search="handleGlobalSearchUpdate"
       @update:filters="handleFiltersUpdate"
     />
-    <div class="rounded-md border">
+    <div class="border rounded-md">
       <Table>
         <TableHeader>
           <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">

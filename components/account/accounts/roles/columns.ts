@@ -4,12 +4,38 @@ import type { Role } from '@prisma/client'
 import DataTableRowActions from './DataTableRowActions.vue'
 import DataTableColumnHeader from './DataTableColumnHeader.vue'
 
+interface RoleTable {
+  id: string;
+  title: string;
+  createdAt: Date;
+  createdBy: {
+    firstName: string | null;
+    middleName: string | null;
+    lastName: string | null;
+  };
+}
+
 // Define custom meta type to include emit function
 interface TableEmitMeta {
   emit: (event: string, ...args: any[]) => void
 }
 
-export const columns: ColumnDef<Role>[] = [
+export const columns: ColumnDef<RoleTable>[] = [
+  {
+      accessorFn: (row) => `${row.createdBy.firstName} ${row.createdBy.middleName} ${row.createdBy.lastName}`,
+      id: 'createdBy', 
+      header: ({ column }) => (
+        h(DataTableColumnHeader, {
+          column: column as any,
+          title: 'Created By'
+        })
+      ),
+      cell: ({ row }) => {
+        // Now this will work
+        const createdBy = row.getValue('createdBy') as string | null
+        return h('div', { class: 'capitalize' }, createdBy || '-')
+      },
+  },
   {
     accessorKey: 'title',
     header: ({ column }) => (

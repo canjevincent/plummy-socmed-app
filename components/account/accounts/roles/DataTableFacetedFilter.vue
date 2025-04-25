@@ -4,8 +4,19 @@
   import type { Role } from '@prisma/client'
   import { cn } from '@/lib/utils'
 
+  interface RoleTable {
+    id: string;
+    title: string;
+    createdAt: Date;
+    createdBy: {
+      firstName: string | null;
+      middleName: string | null;
+      lastName: string | null;
+    };
+  }
+
   interface DataTableFacetedFilter {
-    column?: Column<Role, any>
+    column?: Column<RoleTable, any>
     title?: string
     options: {
       label: string
@@ -24,10 +35,10 @@
   <Popover>
     <PopoverTrigger as-child>
       <Button variant="outline" size="sm" class="h-8 border-dashed">
-        <Icon name="lucide:circle-plus" class="mr-2 w-4 h-4" />
+        <Icon name="lucide:circle-plus" class="w-4 h-4 mr-2" />
         {{ title }}
         <template v-if="selectedValues.size > 0">
-          <Separator orientation="vertical" class="mx-2 h-4" />
+          <Separator orientation="vertical" class="h-4 mx-2" />
           <Badge
             variant="secondary"
             class="px-1 font-normal rounded-sm lg:hidden"
@@ -93,9 +104,9 @@
               >
                 <Icon name="lucide:check" :class="cn('h-4 w-4')" />
               </div>
-              <component :is="option.icon" v-if="option.icon" class="mr-2 w-4 h-4 text-muted-foreground" />
+              <component :is="option.icon" v-if="option.icon" class="w-4 h-4 mr-2 text-muted-foreground" />
               <span>{{ option.label }}</span>
-              <span v-if="facets?.get(option.value)" class="flex justify-center items-center ml-auto w-4 h-4 font-mono text-xs">
+              <span v-if="facets?.get(option.value)" class="flex items-center justify-center w-4 h-4 ml-auto font-mono text-xs">
                 {{ facets.get(option.value) }}
               </span>
             </CommandItem>

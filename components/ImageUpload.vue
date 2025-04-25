@@ -64,10 +64,10 @@
 </script>
 
 <template>
-  <div class="flex gap-4 items-center mb-4" v-if="value">
+  <div class="flex items-center gap-4 mb-4" v-if="value">
     <div :key="value" class="relative w-[200px] h-[200px] rounded-md overflow-hidden">
 
-      <div class="absolute top-2 right-2 z-10">
+      <div class="absolute z-10 top-2 right-2">
         <Button type="button" @click="deleteImage(value)" variant="destructive" size="sm" :disabled="isImageUpdating || isUpdating"> 
 
           <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" v-if="isImageUpdating || isUpdating" disabled>
@@ -86,10 +86,10 @@
         </Button>
       </div>
       
-      <img :src="value" class="object-cover w-full h-full" alt="image" />
+      <NuxtImg :src="value" class="object-cover w-full h-full" alt="image" />
 
       <!-- Overlay SVG Spinner -->
-      <div v-if="isImageUpdating || isUpdating" class="flex absolute inset-0 justify-center items-center bg-black bg-opacity-50">
+      <div v-if="isImageUpdating || isUpdating" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
         <svg xmlns="http://www.w3.org/2000/svg" width="10em" height="10em" viewBox="0 0 24 24">
           <circle cx="4" cy="12" r="3" fill="white">
             <animate id="svgSpinners3DotsScale0" attributeName="r" begin="0;svgSpinners3DotsScale1.end-0.25s" dur="0.75s" values="3;.2;3"></animate>
@@ -132,7 +132,7 @@
         </circle>
       </svg>
 
-      <Icon name="lucide:image-plus" class="mr-2 w-4 h-4" v-if="!isImageUpdating"></Icon>
+      <Icon name="lucide:image-plus" class="w-4 h-4 mr-2" v-if="!isImageUpdating"></Icon>
       
       Image
     </Button>

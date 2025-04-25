@@ -13,6 +13,20 @@ export default defineEventHandler(async (event) => {
   // Sorting
   const sortBy = query.sortBy as string || 'createdAt';
   const sortOrder = query.sortOrder as string || 'desc';
+
+  // Handle special case for sorting by role_title
+  let orderBy: any = {
+    [sortBy]: sortOrder
+  };
+
+  // If sorting by role_title, use a different orderBy structure
+  if (sortBy === 'roleTitle') {
+    orderBy = {
+      role: {
+        title: sortOrder
+      }
+    };
+  }
   
   // Filtering
   const filters = query.filters ? JSON.parse(query.filters as string) : {};
@@ -26,12 +40,16 @@ export default defineEventHandler(async (event) => {
   if (filters.firstName) where.firstName = { contains: filters.firstName, mode: 'insensitive' };
   if (filters.lastName) where.lastName = { contains: filters.lastName, mode: 'insensitive' };
   
-  // Handle role filter - can be array or single value
-  if (filters.role) {
-    if (Array.isArray(filters.role)) {
-      where.role = { in: filters.role };
+  // Handle roleTitle filter - can be array or single value
+  if (filters.roleTitle) {
+    if (Array.isArray(filters.roleTitle)) {
+      where.role = {
+        title: { in: filters.roleTitle }
+      };
     } else {
-      where.role = filters.role;
+      where.role = {
+        title: { equals: filters.roleTitle }
+      };
     }
   }
   
@@ -40,7 +58,8 @@ export default defineEventHandler(async (event) => {
     where.OR = [
       { email: { contains: globalSearch, mode: 'insensitive' } },
       { firstName: { contains: globalSearch, mode: 'insensitive' } },
-      { lastName: { contains: globalSearch, mode: 'insensitive' } }
+      { lastName: { contains: globalSearch, mode: 'insensitive' } },
+      { role: { title: { contains: globalSearch, mode: 'insensitive' } } }
     ];
   }
   
@@ -50,17 +69,21 @@ export default defineEventHandler(async (event) => {
       select: {
         id: true,
         firstName: true,
+        middleName: true,
         lastName: true,
-        role: true,
+        roleId: true,
         email: true,
-        createdAt: true
+        createdAt: true,
+        role: {
+          select: {
+            title: true
+          }
+        }
       },
       where,
       skip,
       take: pageSize,
-      orderBy: {
-        [sortBy]: sortOrder
-      }
+      orderBy
     }),
     prisma.user.count({ where })
   ]);

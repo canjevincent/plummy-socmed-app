@@ -4,6 +4,19 @@
   import { useUsersTable } from '@/composables/useUsersTable'
   import type { User } from '@prisma/client'
 
+  interface UserTable {
+    id: string;
+    firstName: string | null;
+    middleName: string | null;
+    lastName: string | null;
+    roleId: string;
+    email: string;
+    createdAt: Date;
+    role: {
+      title: string;
+    };
+  }
+
   const {
     page,
     pageSize,
@@ -27,7 +40,7 @@
   const emit = defineEmits(['onCloseCreateModal']);
 
   // Handle newly created user
-  const handleCreateUser = async (createdUser: User) => {
+  const handleCreateUser = async (createdUser: UserTable) => {
     // Refresh the table data to include the new user
     await refresh()
 
@@ -107,7 +120,7 @@
 </script>
 
 <template>
-  <section class="container p-4 mt-5 bg-white rounded-md border border-gray-100 shadow-sm">
+  <section class="container p-4 mt-5 bg-white border border-gray-100 rounded-md shadow-sm">
     <DataTable 
       :columns="columns" 
       :data="tableData?.data || []"

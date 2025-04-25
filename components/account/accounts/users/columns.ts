@@ -5,12 +5,25 @@ import { h } from 'vue'
 import DataTableColumnHeader from './DataTableColumnHeader.vue'
 import DataTableRowActions from './DataTableRowActions.vue'
 
+interface UserTable {
+  id: string;
+  firstName: string | null;
+  middleName: string | null;
+  lastName: string | null;
+  roleId: string;
+  email: string;
+  createdAt: Date;
+  role: {
+    title: string;
+  };
+}
+
 // Define custom meta type to include emit function
 interface TableEmitMeta {
   emit: (event: string, ...args: any[]) => void
 }
 
-export const columns: ColumnDef<User>[] = [
+export const columns: ColumnDef<UserTable>[] = [
   {
     accessorKey: 'id',
     header: 'ID',
@@ -43,11 +56,18 @@ export const columns: ColumnDef<User>[] = [
     ),
   },
   {
-    accessorKey: 'role',
-    header: 'Role',
+    accessorFn: (row) => row.role.title,
+    id: 'roleTitle', 
+    header: ({ column }) => (
+      h(DataTableColumnHeader, {
+        column: column as any,
+        title: 'Role'
+      })
+    ),
     cell: ({ row }) => {
-      const role = row.getValue('role') as string | null
-      return h('div', { class: 'capitalize' }, role || '-')
+      // Now this will work
+      const roleTitle = row.getValue('roleTitle') as string | null
+      return h('div', { class: 'capitalize' }, roleTitle || '-')
     },
   },
   {

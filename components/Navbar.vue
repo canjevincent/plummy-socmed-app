@@ -16,11 +16,11 @@
 <template>
   <section class="bg-white">
     <header class="absolute inset-x-0 top-0 z-50">
-      <nav class="flex justify-between items-center p-6 lg:px-8" aria-label="Global">
+      <nav class="flex items-center justify-between p-6 lg:px-8" aria-label="Global">
         <div class="flex lg:flex-1">
           <a href="#" class="p-1.5 -m-1.5">
             <!-- <span class="sr-only">Your Company</span>
-            <img class="w-auto h-10 rounded-md" src="/plummy-logo.png" alt="" /> -->
+            <NuxtImg class="w-auto h-10 rounded-md" src="/plummy-logo.png" alt="" /> -->
             <client-only>
                 <Vue3Lottie
                   :animationData="jitterlogoblack"
@@ -48,11 +48,11 @@
       <!-- Replace the div with v-show directive for proper toggle functionality -->
       <div class="lg:hidden" v-show="mobileMenuOpen">
         <div class="fixed inset-0 z-50" />
-        <div class="overflow-y-auto fixed inset-y-0 right-0 z-50 px-6 py-6 w-full bg-white sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
-          <div class="flex justify-between items-center">
+        <div class="fixed inset-y-0 right-0 z-50 w-full px-6 py-6 overflow-y-auto bg-white sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
+          <div class="flex items-center justify-between">
             <!-- <a href="#" class="p-1.5 -m-1.5">
               <span class="sr-only">Your Company</span>
-              <img class="w-auto h-10 rounded-md" src="/plummy-logo.png" alt="" />
+              <NuxtImg class="w-auto h-10 rounded-md" src="/plummy-logo.png" alt="" />
             </a>
             <button type="button" class="p-2.5 -m-2.5 text-gray-700 rounded-md" @click="mobileMenuOpen = false">
               <span class="sr-only">Close menu</span>

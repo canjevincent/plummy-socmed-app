@@ -16,7 +16,8 @@
   
   // Define a type for searchable column configuration
   type SearchableColumn = {
-    accessorKey: string
+    accessorKey?: string
+    id?: string
     displayName?: string
   }
 
@@ -38,9 +39,10 @@
     if (props.searchableColumns.length > 0) return props.searchableColumns
 
     return props.columns
-      .filter((col): col is ExtendedColumnDef => !!col.accessorKey)
+      .filter((col): col is ExtendedColumnDef => !!(col.accessorKey || col.id))
       .map(col => ({ 
-        accessorKey: col.accessorKey!, 
+        accessorKey: col.accessorKey,
+        id: col.id,
         displayName: col.header as string 
       }))
   })
@@ -73,9 +75,11 @@
       
       // Filter and map to only searchable columns
       return searchableColumns.value.some(col => {
-        const cellValue = row.getValue(col.accessorKey)
+        const key = col.accessorKey || col.id
+        if (!key) return false
+        const cellValue = row.getValue(key)
         return cellValue != null && 
-               String(cellValue).toLowerCase().includes(searchTerm)
+              String(cellValue).toLowerCase().includes(searchTerm)
       })
     },
     state: {

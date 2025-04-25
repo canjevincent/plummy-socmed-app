@@ -2,14 +2,27 @@
   import type { Table } from '@tanstack/vue-table'
   import type { User } from '@prisma/client'
 
+  interface UserTable {
+    id: string;
+    firstName: string | null;
+    middleName: string | null;
+    lastName: string | null;
+    roleId: string;
+    email: string;
+    createdAt: Date;
+    role: {
+      title: string;
+    };
+  }
+
   interface DataTablePaginationProps {
-    table: Table<User>
+    table: Table<UserTable>
   }
   defineProps<DataTablePaginationProps>()
 </script>
 
 <template>
-  <div class="flex justify-between items-center px-2">
+  <div class="flex items-center justify-between px-2">
     <div class="flex-1 text-sm text-muted-foreground">
       {{ table.getFilteredSelectedRowModel().rows.length }} of
       {{ table.getFilteredRowModel().rows.length }} row(s) selected.
@@ -40,7 +53,7 @@
       <div class="flex items-center space-x-2">
         <Button
           variant="outline"
-          class="hidden p-0 w-8 h-8 lg:flex"
+          class="hidden w-8 h-8 p-0 lg:flex"
           :disabled="!table.getCanPreviousPage()"
           @click="table.setPageIndex(0)"
         >
@@ -49,7 +62,7 @@
         </Button>
         <Button
           variant="outline"
-          class="p-0 w-8 h-8"
+          class="w-8 h-8 p-0"
           :disabled="!table.getCanPreviousPage()"
           @click="table.previousPage()"
         >
@@ -58,7 +71,7 @@
         </Button>
         <Button
           variant="outline"
-          class="p-0 w-8 h-8"
+          class="w-8 h-8 p-0"
           :disabled="!table.getCanNextPage()"
           @click="table.nextPage()"
         >
@@ -67,7 +80,7 @@
         </Button>
         <Button
           variant="outline"
-          class="hidden p-0 w-8 h-8 lg:flex"
+          class="hidden w-8 h-8 p-0 lg:flex"
           :disabled="!table.getCanNextPage()"
           @click="table.setPageIndex(table.getPageCount() - 1)"
         >

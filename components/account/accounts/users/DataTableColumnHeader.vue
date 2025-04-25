@@ -3,8 +3,21 @@
   import type { User } from '@prisma/client'
   import { cn } from '@/lib/utils'
 
+  interface UserTable {
+    id: string;
+    firstName: string | null;
+    middleName: string | null;
+    lastName: string | null;
+    roleId: string;
+    email: string;
+    createdAt: Date;
+    role: {
+      title: string;
+    };
+  }
+
   interface DataTableColumnHeaderProps {
-    column: Column<User, any>
+    column: Column<UserTable, any>
     title: string
   }
 
@@ -27,9 +40,9 @@
           class="-ml-3 h-8 data-[state=open]:bg-accent"
         >
           <span>{{ title }}</span>
-          <Icon name="lucide:arrow-down" v-if="column.getIsSorted() === 'desc'" class="ml-2 w-4 h-4" />
-          <Icon name="lucide:arrow-up" v-else-if=" column.getIsSorted() === 'asc'" class="ml-2 w-4 h-4" />
-          <Icon name="lucide:chevrons-up-down" v-else class="ml-2 w-4 h-4" />
+          <Icon name="lucide:arrow-down" v-if="column.getIsSorted() === 'desc'" class="w-4 h-4 ml-2" />
+          <Icon name="lucide:arrow-up" v-else-if=" column.getIsSorted() === 'asc'" class="w-4 h-4 ml-2" />
+          <Icon name="lucide:chevrons-up-down" v-else class="w-4 h-4 ml-2" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">

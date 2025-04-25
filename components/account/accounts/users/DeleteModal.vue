@@ -52,7 +52,7 @@
     description="User account will be deleted permanently."
     @on-close="emit('onClose')"
   >
-    <div class="flex justify-end items-center pt-6 space-x-2 w-full">
+    <div class="flex items-center justify-end w-full pt-6 space-x-2">
       <Button variant="outline" @click="emit('onClose')" :disabled="isDeleting">
         <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" v-if="isDeleting" disabled>
           <circle cx="4" cy="12" r="3" fill="currentColor">

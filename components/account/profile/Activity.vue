@@ -2,17 +2,17 @@
 </script>
 
 <template>
-  <section class="container px-4 py-4 bg-white rounded-md border border-gray-100 shadow-sm">
-    <div class="mx-auto max-w-2xl">
+  <section class="container px-4 py-4 bg-white border border-gray-100 rounded-md shadow-sm">
+    <div class="max-w-2xl mx-auto">
       <div class="mb-12 text-center">
         <div class="inline-flex items-center px-2.5 py-0.5 mb-4 text-xs font-semibold rounded-full border border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-primary text-primary-foreground hover:bg-primary/80">FAQ</div>
         <h2 class="mb-4 text-3xl font-bold">Project Timeline Questions</h2>
         <p class="text-muted-foreground">Common questions about our development process</p>
       </div>
       <div class="relative">
-        <div class="absolute top-0 left-8 w-px h-full bg-border"></div>
+        <div class="absolute top-0 w-px h-full left-8 bg-border"></div>
         <div class="relative mb-8">
-          <div class="flex absolute left-0 justify-center items-center w-16 h-16 rounded-full border-2 bg-background border-primary">
+          <div class="absolute left-0 flex items-center justify-center w-16 h-16 border-2 rounded-full bg-background border-primary">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 lucide lucide-lightbulb-icon text-primary">
               <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"></path>
               <path d="M9 18h6"></path>
@@ -21,7 +21,7 @@
           </div>
           <div class="ml-24">
             <h3 class="mb-4 text-xl font-semibold">Discovery Phase</h3>
-            <div class="mb-4 rounded-lg border shadow-sm bg-card text-card-foreground">
+            <div class="mb-4 border rounded-lg shadow-sm bg-card text-card-foreground">
               <div class="flex flex-col gap-y-1.5 p-6">
                 <h3 class="text-lg font-semibold tracking-tight">What happens during the discovery phase?</h3>
               </div>
@@ -35,7 +35,7 @@
           </div>
         </div>
         <div class="relative mb-8">
-          <div class="flex absolute left-0 justify-center items-center w-16 h-16 rounded-full border-2 bg-background border-primary">
+          <div class="absolute left-0 flex items-center justify-center w-16 h-16 border-2 rounded-full bg-background border-primary">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 lucide lucide-code-icon text-primary">
               <polyline points="16 18 22 12 16 6"></polyline>
               <polyline points="8 6 2 12 8 18"></polyline>
@@ -43,7 +43,7 @@
           </div>
           <div class="ml-24">
             <h3 class="mb-4 text-xl font-semibold">Development Phase</h3>
-            <div class="mb-4 rounded-lg border shadow-sm bg-card text-card-foreground">
+            <div class="mb-4 border rounded-lg shadow-sm bg-card text-card-foreground">
               <div class="flex flex-col gap-y-1.5 p-6">
                 <h3 class="text-lg font-semibold tracking-tight">How is the development process structured?</h3>
               </div>
@@ -57,7 +57,7 @@
           </div>
         </div>
         <div class="relative mb-8">
-          <div class="flex absolute left-0 justify-center items-center w-16 h-16 rounded-full border-2 bg-background border-primary">
+          <div class="absolute left-0 flex items-center justify-center w-16 h-16 border-2 rounded-full bg-background border-primary">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 lucide lucide-test-tube-icon text-primary">
               <path d="M14.5 2v17.5c0 1.4-1.1 2.5-2.5 2.5c-1.4 0-2.5-1.1-2.5-2.5V2"></path>
               <path d="M8.5 2h7"></path>
@@ -66,7 +66,7 @@
           </div>
           <div class="ml-24">
             <h3 class="mb-4 text-xl font-semibold">Testing Phase</h3>
-            <div class="mb-4 rounded-lg border shadow-sm bg-card text-card-foreground">
+            <div class="mb-4 border rounded-lg shadow-sm bg-card text-card-foreground">
               <div class="flex flex-col gap-y-1.5 p-6">
                 <h3 class="text-lg font-semibold tracking-tight">What types of testing do you perform?</h3>
               </div>
@@ -80,7 +80,7 @@
           </div>
         </div>
         <div class="relative mb-8">
-          <div class="flex absolute left-0 justify-center items-center w-16 h-16 rounded-full border-2 bg-background border-primary">
+          <div class="absolute left-0 flex items-center justify-center w-16 h-16 border-2 rounded-full bg-background border-primary">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 lucide lucide-rocket-icon text-primary">
               <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path>
               <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path>
@@ -90,7 +90,7 @@
           </div>
           <div class="ml-24">
             <h3 class="mb-4 text-xl font-semibold">Launch Phase</h3>
-            <div class="mb-4 rounded-lg border shadow-sm bg-card text-card-foreground">
+            <div class="mb-4 border rounded-lg shadow-sm bg-card text-card-foreground">
               <div class="flex flex-col gap-y-1.5 p-6">
                 <h3 class="text-lg font-semibold tracking-tight">What support is provided during launch?</h3>
               </div>

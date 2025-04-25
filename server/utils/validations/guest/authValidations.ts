@@ -60,7 +60,6 @@ export const authLogin = z.object({
 
   // Verify the password
   const isPasswordCorrect = await verifyPassword(existingUser.hashedPassword, data.password);
-  console.log("isPasswordCorrect ",isPasswordCorrect)
   return isPasswordCorrect;
 }, {
   message: "Email or password is incorrect.",

@@ -3,8 +3,19 @@
   import type { Role } from '@prisma/client'
   import { cn } from '@/lib/utils'
 
+  interface RoleTable {
+    id: string;
+    title: string;
+    createdAt: Date;
+    createdBy: {
+      firstName: string | null;
+      middleName: string | null;
+      lastName: string | null;
+    };
+  }
+
   interface DataTableColumnHeaderProps {
-    column: Column<Role, any>
+    column: Column<RoleTable, any>
     title: string
   }
 
@@ -27,9 +38,9 @@
           class="-ml-3 h-8 data-[state=open]:bg-accent"
         >
           <span>{{ title }}</span>
-          <Icon name="lucide:arrow-down" v-if="column.getIsSorted() === 'desc'" class="ml-2 w-4 h-4" />
-          <Icon name="lucide:arrow-up" v-else-if=" column.getIsSorted() === 'asc'" class="ml-2 w-4 h-4" />
-          <Icon name="lucide:chevrons-up-down" v-else class="ml-2 w-4 h-4" />
+          <Icon name="lucide:arrow-down" v-if="column.getIsSorted() === 'desc'" class="w-4 h-4 ml-2" />
+          <Icon name="lucide:arrow-up" v-else-if=" column.getIsSorted() === 'asc'" class="w-4 h-4 ml-2" />
+          <Icon name="lucide:chevrons-up-down" v-else class="w-4 h-4 ml-2" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">

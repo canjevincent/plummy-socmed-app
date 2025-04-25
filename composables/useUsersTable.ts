@@ -74,7 +74,6 @@ export function useUsersTable() {
   const resetPagination = () => {
     page.value = 1
   }
-
   return {
     page,
     pageSize,

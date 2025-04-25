@@ -53,8 +53,7 @@ model Role {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  // Embedded
-  permissions  Permission[]
+  permissions  Json?
 
   // Explicit ordered array of user IDs (this is what you'll update via MongoDB)
   userIds      String[] @db.ObjectId
@@ -64,10 +63,6 @@ model Role {
   createdBy    User @relation("CreatedByUser", fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   users User[] @relation("assignedRoles")
-}
-
-type Permission {
-  authorization String
 }
 
 model Post {

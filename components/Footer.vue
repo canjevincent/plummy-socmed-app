@@ -4,10 +4,10 @@
 <template>
   <section>
     <div class="px-4 pt-16 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24 lg:px-8">
-      <div class="grid gap-10 mb-8 row-gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="grid gap-10 row-gap-6 mb-8 sm:grid-cols-2 lg:grid-cols-4">
         <div class="sm:col-span-2">
           <a href="/" aria-label="Go home" title="Company" class="inline-flex items-center">
-            <img class="w-auto h-10 rounded-md" src="/plummy-logo.png" alt="" />
+            <NuxtImg class="w-auto h-10 rounded-md" src="/plummy-logo.png" alt="" />
             <span class="ml-2 text-xl font-bold tracking-wide text-gray-800 uppercase">PLUMMY</span>
           </a>
           <div class="mt-6 lg:max-w-sm">

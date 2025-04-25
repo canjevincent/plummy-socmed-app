@@ -1,15 +1,45 @@
 <script setup lang="ts">
   import type { Table } from '@tanstack/vue-table'
-  import type { User } from '@prisma/client'
-
-  import { roles } from './toolbar'
   import DataTableFacetedFilter from './DataTableFacetedFilter.vue'
   import DataTableViewOptions from './DataTableViewOptions.vue'
 
+  interface UserTable {
+    id: string;
+    firstName: string | null;
+    middleName: string | null;
+    lastName: string | null;
+    roleId: string;
+    email: string;
+    createdAt: Date;
+    role: {
+      title: string;
+    };
+  }
+
   interface DataTableToolbarProps {
-    table: Table<User>
+    table: Table<UserTable>
     globalSearch: string
   }
+
+  interface Role {
+    value: string;
+    label: string;
+    icon?: Component;
+  }
+
+  const { data:roleToolBarData, isLoading, error } = useQuery<Role[], Error>({ 
+    queryKey: ['user-role-toolbar-faceted-filter'],
+    queryFn: async (): Promise<Role[]> => {
+      const roles = await $fetch<Role[]>('/api/account/accounts/users/roleToolbar');
+      
+      // Transform the API response to include Vue component icons
+      return roles.map(role => ({
+        value: role.value,
+        label: role.label,
+        icon: h('lucide:circle-user', { class: 'mr-2 w-4 h-4' }) as Component
+      }));
+    }
+  });
 
   const props = defineProps<DataTableToolbarProps>()
   const emit = defineEmits(['update:globalSearch', 'update:filters'])
@@ -47,8 +77,8 @@
 </script>
 
 <template>
-  <div class="flex justify-between items-center">
-    <div class="flex flex-1 items-center space-x-2">
+  <div class="flex items-center justify-between">
+    <div class="flex items-center flex-1 space-x-2">
       <Input
         placeholder="Search emails, names..."
         :model-value="searchInput"
@@ -56,20 +86,20 @@
         @input="handleSearchInput"
       />
       <DataTableFacetedFilter
-        v-if="table.getColumn('role')"
-        :column="table.getColumn('role')"
+        v-if="table.getColumn('roleTitle')"
+        :column="table.getColumn('roleTitle')"
         title="Role"
-        :options="roles"
+        :options="roleToolBarData || []"
       />
 
       <Button
         v-if="isFiltered"
         variant="ghost"
-        class="px-2 h-8 lg:px-3"
+        class="h-8 px-2 lg:px-3"
         @click="resetFilters"
       >
         Reset
-        <Icon name="lucide:circle-x" class="ml-2 w-4 h-4" />
+        <Icon name="lucide:circle-x" class="w-4 h-4 ml-2" />
       </Button>
     </div>
     <DataTableViewOptions :table="table" />
