@@ -3,7 +3,6 @@
 
 <template>
   <section class="flex flex-col gap-y-2">
-
     <div class="group" v-for="x in 5" :key="x">
     
       <div class="flex flex-col px-3 pt-3 pb-0 border-[1px] group-hover:shadow-md group-hover:border-purple-500 rounded-sm shadow-sm gap-y-2 bg-muted/50">

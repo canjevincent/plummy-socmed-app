@@ -3,6 +3,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
   modules: [
+    '@pinia/nuxt',
     '@nuxtjs/tailwindcss',
     'shadcn-nuxt',
     '@nuxtjs/google-fonts',
@@ -27,10 +28,13 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       cloudinaryCloudName: process.env.NUXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-      uploadPreset: process.env.NUXT_PUBLIC_UPLOAD_PRESET
+      uploadPreset: process.env.NUXT_PUBLIC_UPLOAD_PRESET,
+      giphyApiKey: process.env.NUXT_PUBLIC_GIPHY_API_KEY,
+      giphyApiUrl: process.env.NUXT_PUBLIC_GIPHY_API_URL,
+      tavilyApiKey: process.env.TAVILY_API_KEY
     },
     cloudinaryApiKey: process.env.NUXT_CLOUDINARY_API_KEY,
-    cloudinaryApiSecret: process.env.NUXT_CLOUDINARY_API_SECRET
+    cloudinaryApiSecret: process.env.NUXT_CLOUDINARY_API_SECRET,
   },
   cloudinary: {
     cloudName: process.env.NUXT_PUBLIC_CLOUDINARY_CLOUD_NAME,

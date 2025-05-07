@@ -439,3 +439,67 @@ By following these examples, you can effectively use MongoDB with Prisma while a
 
   By mastering these concepts, you can create Nuxt applications that deliver both excellent user experience and search engine visibility while maintaining developer productivity.
 
+--Caching Level
+
+1. Hardware Level: Caches operating at the CPU and disk level, largely managed automatically by the hardware and OS. (e.g., CPU L1/L2/L3 cache, OS page cache). Application developers don't usually 
+   interact with these directly, but they benefit from them.   
+
+2. Client-Side Level: Caching that happens on the end-user's machine. Browser Cache: Stores web assets (HTML, CSS, JS, images). Client Application Cache: Local caching within desktop or mobile apps.
+
+3. Network Level (Intermediary Caches): Caches that sit between the client and the origin server. CDN (Content Delivery Network): Caches content geographically closer to users. Reverse Proxy Cache: Caches responses 
+   directly in front of the web/application server (e.g., Nginx, Varnish).   
+  
+4. Server-Side / Application Level: Caching implemented within or alongside the application code running on the server. This is where developers have the most direct control and variety of options: In-Memory Cache: Within 
+   the application's process (e.g., using dictionaries/maps). Distributed Cache: External cache server shared by multiple application instances (e.g., Redis, Memcached). Function/Method Caching (Memoization): Caching the results of function calls.   
+   Object Caching: Caching constructed objects or data representations.
+
+5. Database Level: Caching mechanisms within the database system itself. Buffer Cache/Pool: Caching disk data in RAM. Query Result Cache: Caching the results of specific queries.
+
+--Breakdown of which caching mechanisms run "under the hood" by default at each level:
+
+1. Hardware Level
+✅ Yes, automatic by default
+
+CPU caches (L1, L2, L3)
+RAM caching
+Storage controller caches
+GPU memory caches
+
+2. Client-Side
+🔄 Partially automatic
+
+Browser HTTP cache (automatic but configurable)
+DNS cache (automatic)
+❌ LocalStorage/SessionStorage (requires explicit programming)
+❌ IndexedDB (requires explicit programming)
+❌ Service Worker cache (requires explicit setup)
+
+3. Network Level
+✅ Yes, automatic by default
+
+DNS caching
+CDN edge caching (automatic once set up)
+Proxy server caching
+ISP caching
+
+4. Server-Side / Application Level
+❌ Mostly NOT automatic
+
+❌ Application memory caches (requires explicit code)
+❌ Session caching (requires explicit setup)
+❌ Object caches (requires implementation)
+✅ Some framework-specific caching may be automatic (e.g., compiled templates)
+
+5. Database Level
+🔄 Partially automatic
+
+✅ Buffer/page caching (automatic)
+✅ Query plan caching (automatic)
+🔄 Result set caching (may be automatic or configurable)
+❌ ORM-level caching (usually requires configuration)
+
+The ability to access and mutate cached data depends entirely on the programming language, framework, or platform you're using and the specific caching mechanism you're working with.
+
+Caching exists at multiple levels of computing systems, not all caching is automatic. Many powerful caching mechanisms require deliberate implementation, and even automatic caches often need 
+configuration to optimize their behavior for specific use cases. The programming language or framework doesn't just determine how you access caches—it also influences what caches exist by default 
+and how they behave without intervention.

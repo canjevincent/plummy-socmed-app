@@ -223,11 +223,72 @@
 # Install Vue Quill for text editor
   bun install @vueup/vue-quill@latest --save
 
+  # for quill types
+  bun add -D @types/quill
+
+  # Use the reference
+  https://github.com/vueup/vue-quill
+  https://quilljs.com/docs/guides/cloning-medium-with-parchment#images
+
 # Install Vue Drag and drop
   bun add vuedraggable@next
 
   # use the reference
   https://github.com/SortableJS/Vue.Draggable
+
+# Install emoji
+  bun install --save emoji-mart-vue-fast
+
+  # Do not change anyything on the required imports, use the following code as a working example
+
+    <script lang="ts" setup>
+      import { Picker, EmojiIndex } from 'emoji-mart-vue-fast/src';
+      import data from 'emoji-mart-vue-fast/data/all.json';
+      import 'emoji-mart-vue-fast/css/emoji-mart.css';
+    </script>
+
+    <template>
+      <button 
+        @click="toggle" 
+        class="px-4 py-2 mb-2 text-white bg-purple-500 rounded-md hover:bg-purple-600"
+      >
+        <Icon name="lucide:smile" class="w-5 h-5" /> 
+        Toggle Picker
+      </button>
+      
+      <Picker
+        v-if="emojiPickerSelected"
+        :data="emojiIndex"
+        title="Pick your emoji…"
+        emoji="point_up"
+        @select="convertEmoji"
+      />
+    </template>
+  
+  # add types in app/types/emoji-mart-vue-fast.d.ts, create the file if it does not exist in your types folder
+    
+    declare module 'emoji-mart-vue-fast' {
+      export const Picker: any;
+      export const EmojiIndex: any;
+      export default any;
+    }
+
+    declare module 'emoji-mart-vue-fast/data/all.json' {
+      const data: any;
+      export default data;
+    }
+
+    declare module 'emoji-mart-vue-fast/css/emoji-mart.css';
+
+    declare module 'emoji-mart-vue-fast/src' {
+      export const Picker: any;
+      export const EmojiIndex: any;
+      export default any;
+    }
+
+
+  # use the reference
+  https://github.com/serebrov/emoji-mart-vue
 
 # How to push on github ?
   # If new project
