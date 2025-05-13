@@ -150,7 +150,7 @@
 
 <template>
   <div class="container flex gap-3">
-    <section class="px-4 py-4 bg-white rounded-md border border-gray-100 shadow-sm w-fit">
+    <section class="px-4 py-4 bg-white border border-gray-100 rounded-md shadow-sm w-fit">
       <div class="flex flex-col flex-1 gap-2">
         <Label for="profileImage" v-if="user.avatarUrl">Profile Image</Label>
         <ImageUpload
@@ -167,7 +167,7 @@
       </div>
     </section>
 
-    <section class="px-4 py-4 w-full bg-white rounded-md border border-gray-100 shadow-sm">
+    <section class="w-full px-4 py-4 bg-white border border-gray-100 rounded-md shadow-sm">
       <form @submit.prevent="onSubmit" action="">
         <div class="flex flex-wrap gap-3">
           
