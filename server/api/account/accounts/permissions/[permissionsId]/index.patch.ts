@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
         }
       });
 
-      return update_role_permission
+      return update_role_permission;
       
     } catch (error) {
       

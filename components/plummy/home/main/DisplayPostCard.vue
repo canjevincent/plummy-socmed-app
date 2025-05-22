@@ -98,13 +98,13 @@
 </script>
 
 <template>
-  <section class="flex flex-col gap-y-2">
+  <section class="flex flex-col space-y-2">
     <div class="group" v-for="post in posts" :key="post.id">
     
-      <div class="flex flex-col px-3 pt-3 pb-0 border rounded-sm shadow-sm group-hover:border-2 group-hover:shadow-md group-hover:border-purple-600 gap-y-2 bg-muted/50">
+      <div class="flex flex-col px-3 pt-3 pb-0 space-y-2 border rounded-sm shadow-sm group-hover:border-2 group-hover:shadow-md group-hover:border-purple-600 bg-muted/50">
 
         <div class="flex justify-between">
-          <div class="flex gap-x-2">
+          <div class="flex space-x-2">
             <div class="w-10 h-10 border-2 border-white rounded-full cursor-pointer group-hover:ring-2 group-hover:ring-purple-600"> 
               <NuxtImg 
                 :src="post.author.avatar" 
@@ -112,7 +112,7 @@
               />
             </div>
 
-            <div class="flex flex-col gap-y-1">
+            <div class="flex flex-col space-y-1">
               <small class="text-sm font-medium leading-none">
                 {{ post.author.name }}
               </small>
@@ -122,7 +122,7 @@
             </div>
           </div>
 
-          <div class="flex items-center gap-x-2">
+          <div class="flex items-center space-x-2">
             <div class="flex items-center justify-center p-1 rounded-full cursor-pointer w-7 h-7 aspect-square hover:bg-purple-200 hover:border hover:border-purple-300">
               <Icon name="lucide:ellipsis" class="w-6 h-6" />
             </div>
@@ -179,14 +179,14 @@
 
         <div class="flex justify-around border-t-2">
           
-          <div class="flex items-center justify-center w-full p-2 rounded-sm cursor-pointer hover:bg-purple-300 gap-x-1">
+          <div class="flex items-center justify-center w-full p-2 space-x-1 rounded-sm cursor-pointer hover:bg-purple-300">
             <Icon name="lucide:thumbs-up" class="w-4 h-4" /> 
             <small class="text-sm font-semibold leading-none">
               Like
             </small>
           </div>
 
-          <div class="flex items-center justify-center w-full p-2 rounded-sm cursor-pointer hover:bg-purple-300 gap-x-1" @click="openPostCommentModal(post)">
+          <div class="flex items-center justify-center w-full p-2 space-x-1 rounded-sm cursor-pointer hover:bg-purple-300" @click="openPostCommentModal(post)">
             <Icon name="lucide:message-square" class="w-4 h-4" /> 
             <small class="text-sm font-semibold leading-none">
               Comment

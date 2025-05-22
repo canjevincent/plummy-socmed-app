@@ -15,7 +15,7 @@ export interface Comment {
   postId: string
 }
 
-export function usePostComments(postId: Ref<string | undefined>) {
+export const usePostComments = (postId: Ref<string | undefined>) => {
   const PAGE_SIZE = 5
   
   const {

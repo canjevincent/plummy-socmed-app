@@ -29,6 +29,7 @@ model User {
   // Relations
   posts          Post[]
   postComments   PostComment[]
+  postLikes      PostLike[]
   createdRoles   Role[] @relation("CreatedByUser")
 
   roleId         String @db.ObjectId
@@ -79,6 +80,7 @@ model Post {
   user         User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   postComments PostComment[]
+  postLikes    PostLike[]
 }
 
 type PostImage {
@@ -99,4 +101,21 @@ model PostComment {
 
   userId    String @db.ObjectId
   user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PostLike {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  emoji      String
+  emoji_name String
+  emoji_id   String
+
+  // Relations
+  postId     String @db.ObjectId
+  post       Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  userId     String @db.ObjectId
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
