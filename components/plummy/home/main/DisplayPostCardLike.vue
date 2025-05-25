@@ -4,7 +4,7 @@
   import data from 'emoji-mart-vue-fast/data/all.json';
   import 'emoji-mart-vue-fast/css/emoji-mart.css';
 
-  import { getPostLiked } from '~/composables/plummy/usePostLikes';
+  import { useGetPostLiked } from '~/composables/plummy/usePostLikes';
   import { useMutation } from '@tanstack/vue-query';
   import { useToast } from '~/components/ui/toast';
   import { formatEmojiName } from '~/utils/emojiUtils';
@@ -22,7 +22,7 @@
     isLiked,
     isLoading: isCheckPostLikedLoading, 
     error: postLikedError, 
-    refetch: refetchPostLiked } = getPostLiked(postId)
+    refetch: refetchPostLiked } = useGetPostLiked(postId)
 
   let includeEmojiLikes = ['smileys'] as any[]
   let excludeEmojiLikes = ['people','nature','foods','activity','places','objects','symbols','flags'] as any[]

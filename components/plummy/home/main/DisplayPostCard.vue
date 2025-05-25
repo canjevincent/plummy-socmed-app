@@ -177,14 +177,15 @@
           </div>
         </Teleport>
 
+        <div class="flex justify-between">
+          <PlummyHomeMainDisplayPostCardUserLike :postId="post.id || null" />
+
+          <PlummyHomeMainDisplayPostCardUserComment :postId="post.id || null" @click="openPostCommentModal(post)" />
+        </div>
+
         <div class="flex justify-around border-t-2">
           
-          <div class="flex items-center justify-center w-full p-2 space-x-1 rounded-sm cursor-pointer hover:bg-purple-300">
-            <Icon name="lucide:thumbs-up" class="w-4 h-4" /> 
-            <small class="text-sm font-semibold leading-none">
-              Like
-            </small>
-          </div>
+          <PlummyHomeMainDisplayPostCardLike :postId="post.id || null" />
 
           <div class="flex items-center justify-center w-full p-2 space-x-1 rounded-sm cursor-pointer hover:bg-purple-300" @click="openPostCommentModal(post)">
             <Icon name="lucide:message-square" class="w-4 h-4" /> 

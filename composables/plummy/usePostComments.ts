@@ -1,18 +1,24 @@
-import { useInfiniteQuery } from '@tanstack/vue-query'
+import { useInfiniteQuery, useQuery } from '@tanstack/vue-query'
 
-interface CommentAuthor {
-  id: string
-  firstName: string
-  lastName: string
-  avatarUrl: string
-}
+export const useGetPostCommentsCount = (postId: Ref<string | undefined>) => {
+  const { data, isLoading, error, refetch } = useQuery<{ count: number }>({
+    queryKey: ['post-comments-count', postId],
+    queryFn: async () => {
+      if (!postId.value) return { count: 0 }
+      const response = await $fetch<{ count: number }>(`/api/plummy/home/main/${postId.value}/commentCount`, {
+        method: 'GET'
+      })
+      return response
+    },
+    enabled: computed(() => !!postId.value)
+  })
 
-export interface Comment {
-  id: string
-  comment: string
-  createdAt: string | Date
-  user: CommentAuthor
-  postId: string
+  return {
+    count: computed(() => data.value?.count ?? 0),
+    isLoading,
+    error,
+    refetch
+  }
 }
 
 export const usePostComments = (postId: Ref<string | undefined>) => {

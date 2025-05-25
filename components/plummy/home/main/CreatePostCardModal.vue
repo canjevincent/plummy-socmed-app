@@ -130,18 +130,17 @@
 
   const handleImageUpload = (event: Event) => {
     const target = event.target as HTMLInputElement;
-    if (target.files) {
-      Array.from(target.files).forEach(file => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          if (e.target?.result && typeof e.target.result === 'string') {
-            selectedImages.value.push(e.target.result);
-            // Removed the code that inserts into Quill editor
-          }
-        };
-        reader.readAsDataURL(file);
-      });
-    }
+    if (!target.files) return;
+    
+    Array.from(target.files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target?.result && typeof e.target.result === 'string') {
+          selectedImages.value.push(e.target.result);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
   const removeImage = (index: number) => {

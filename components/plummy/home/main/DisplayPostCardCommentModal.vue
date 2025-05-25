@@ -40,10 +40,6 @@
   }>();
 
   const postId = computed(() => props.postContent?.id)
-
-  // Use the composable to fetch the likes & count
-
-  const selectedEmojiId = ref<string | undefined>(undefined);
   
   // Use the composable to fetch comments
   const { 
@@ -295,11 +291,6 @@
     }
   }, { immediate: true })
 
-  const handleEmojiFilter = (emojiId: string | undefined) => {
-    selectedEmojiId.value = emojiId;
-    // refetchLikesView();
-  }
-
 </script>
 
 <template>
@@ -351,7 +342,11 @@
             </div>
           </div>
 
-          <PlummyHomeMainDisplayPostCardUserLike :postId="postId || null" />
+          <div class="flex justify-between">
+            <PlummyHomeMainDisplayPostCardUserLike :postId="postId || null" />
+
+            <PlummyHomeMainDisplayPostCardUserComment :postId="postId || null" />
+          </div>
 
           <div class="flex justify-around border-y-2">
             

@@ -1,7 +1,6 @@
-import { useInfiniteQuery } from '@tanstack/vue-query'
-import { useQuery } from '@tanstack/vue-query'
+import { useQuery, useInfiniteQuery } from '@tanstack/vue-query'
 
-export const getPostLiked = (postId: Ref<string | undefined>) => { 
+export const useGetPostLiked = (postId: Ref<string | undefined>) => { 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['check-post-liked', postId],
     queryFn: async () => {
@@ -25,7 +24,7 @@ export const getPostLiked = (postId: Ref<string | undefined>) => {
   }
 }
 
-export const getPostLikesCount = (postId: Ref<string | undefined>) => {
+export const useGetPostLikesCount = (postId: Ref<string | undefined>) => {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['post-likes-count', postId],
     queryFn: async () => {

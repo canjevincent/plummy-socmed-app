@@ -30,8 +30,9 @@ model User {
   posts          Post[]
   postComments   PostComment[]
   postLikes      PostLike[]
-  createdRoles   Role[] @relation("CreatedByUser")
+  dailies        Daily[]
 
+  createdRoles   Role[] @relation("CreatedByUser")
   roleId         String @db.ObjectId
   role           Role @relation("assignedRoles",fields: [roleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
@@ -112,6 +113,18 @@ model PostLike {
   // Relations
   postId     String @db.ObjectId
   post       Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  userId     String @db.ObjectId
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Daily {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  title String
+  dailyurl String
 
   userId     String @db.ObjectId
   user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)

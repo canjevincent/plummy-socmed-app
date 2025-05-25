@@ -6,7 +6,7 @@
     <PlummyHomeMainCreatePostCard />
   </section>
   <section class="w-full max-w-3xl mx-auto h-44">
-    <PlummyHomeMainDailyCard />
+    <PlummyHomeMainDisplayDailyCard />
   </section>
   <section class="mx-auto h-[100vh] w-full max-w-3xl">
     <PlummyHomeMainDisplayPostCard />
