@@ -35,6 +35,7 @@
     "lucide-vue-next": "^0.479.0",
     "nuxt": "^3.16.0",
     "nuxt-auth-utils": "0.5.16",
+    "nuxt-color-picker": "^1.2.8",
     "pinia": "^3.0.2",
     "reka-ui": "^2.2.1",
     "shadcn-nuxt": "1.0.2",

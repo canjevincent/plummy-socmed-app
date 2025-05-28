@@ -12,7 +12,8 @@ export default defineNuxtConfig({
     'nuxt-auth-utils',
     '@prisma/nuxt',
     '@hebilicious/vue-query-nuxt',
-    '@nuxtjs/cloudinary'
+    '@nuxtjs/cloudinary',
+    'nuxt-color-picker'
   ],
   shadcn: {
     /**
