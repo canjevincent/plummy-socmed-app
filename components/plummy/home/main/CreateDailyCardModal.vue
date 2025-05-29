@@ -80,8 +80,13 @@
         title: 'Images Uploaded',
         description: 'Images has been uploaded successfully.',
       });
-  
-      
+
+      // Switch to album
+      clickMainAlbum();
+      // Refetch newly uploaded images
+      await refetchDaily();
+      // Clear the selected images
+      selectedImages.value = [];
     },
     onError: (error: any) => {
 
@@ -107,7 +112,7 @@
   });
 
   // Current Daily Images
-  const { data:queryDailyData, isLoading:isDailyLoading, error:dailyError } = useQuery({
+  const { data:queryDailyData, isLoading:isDailyLoading, error:dailyError, refetch:refetchDaily } = useQuery({
     queryKey: ['daily'],
     queryFn: async () => {
       const response = await fetch('/api/plummy/home/main/daily');
@@ -279,202 +284,297 @@
 
         </ResizablePanel>
 
-        <!-- Modify -->
-        <ResizablePanel v-show="showModify">
-
-          <div class="flex flex-wrap items-center justify-start gap-4 p-6">
-
-            <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-y-2 p-3">
-             <p class="text-sm">Opacity</p>
-             <Slider
-                v-model="imageOpacity"
-                :max="100"
-                :step="1"
-                class="text-sm"
-              />
-              <p class="ml-auto text-sm">{{ imageOpacity?.[0] }}</p>
-            </div>
-
-            <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-y-2 p-3">
-             <p class="text-sm">Blurr</p>
-             <Slider
-                v-model="imageBlurr"
-                :max="1000"
-                :step="100"
-                class="text-sm"
-              />
-              <p class="ml-auto text-sm">{{ imageBlurr?.[0] }}</p>
-            </div>
-
-            <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-y-2 p-3">
-             <p class="text-sm">Blurr Faces</p>
-             <Slider
-                v-model="imageBlurrFaces"
-                :max="1000"
-                :step="100"
-                class="text-sm"
-              />
-              <p class="ml-auto text-sm">{{ imageBlurrFaces?.[0] }}</p>
-            </div>
-
-            <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-y-2 p-3">
-             <p class="text-sm">Sharpen</p>
-             <Slider
-                v-model="imageSharpen"
-                :max="1000"
-                :step="100"
-                class="text-sm"
-              />
-              <p class="ml-auto text-sm">{{ imageSharpen?.[0] }}</p>
-            </div>
-
-            <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-y-2 p-3">
-             <p class="text-sm">Brightness</p>
-             <Slider
-                v-model="imagesBrightness"
-                :max="100"
-                :step="1"
-                class="text-sm"
-              />
-              <p class="ml-auto text-sm">{{ imagesBrightness?.[0] }}</p>
-            </div>
-
-            <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-y-2 p-3">
-             <p class="text-sm">Vibrance</p>
-             <Slider
-                v-model="imagesVibrance"
-                :max="100"
-                :step="1"
-                class="text-sm"
-              />
-              <p class="ml-auto text-sm">{{ imagesVibrance?.[0] }}</p>
-            </div>
-
-            <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-y-2 p-3">
-             <p class="text-sm">Angle</p>
-             <Slider
-                v-model="imagesAngle"
-                :max="100"
-                :step="1"
-                class="text-sm"
-              />
-              <p class="ml-auto text-sm">{{ imagesAngle?.[0] }}</p>
-            </div>
-
-            <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-y-2 p-3">
-             <p class="text-sm">Text Content</p>
-             <Input v-model="textContent" class="text-sm" />
-            </div>
-
-            <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-y-2 p-3">
-             <p class="text-sm">Text Position X</p>
-             <Slider
-                v-model="textPositionX"
-                :max="1000"
-                :step="1"
-                class="text-sm"
-              />
-              <p class="ml-auto text-sm">{{ textPositionX?.[0] }}</p>
-            </div>
-
-            <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-y-2 p-3">
-             <p class="text-sm">Text Position Y</p>
-             <Slider
-                v-model="textPositionY"
-                :max="1000"
-                :step="1"
-                class="text-sm"
-              />
-              <p class="ml-auto text-sm">{{ textPositionY?.[0] }}</p>
-            </div>
-
-            <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-y-2 p-3">
-             <p class="text-sm">Font Size</p>
-             <Slider
-                v-model="textFontSize"
-                :max="1000"
-                :step="1"
-                class="text-sm"
-              />
-              <p class="ml-auto text-sm">{{ textFontSize?.[0] }}</p>
-            </div>
-
-            <color-picker-block
-              v-model="textColor"
-              :withAlpha="true"
-              :withInitialColor="true"
-              :withEyeDropper="true"
-              :withHexInput="true"
-              :withRgbInput="true"
-              :withColorsHistory="true"
-              :immediateEmit="true"
-              @change="console.log('New color:', $event)"
-            />
-
-            <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-x-2 p-3 justify-start items-center flex">
-              <Switch id="dashboard-posts-create" v-model="imagesRemoveBackground" class="scale-75" />
-              <Label for="dashboard-posts-create" class="text-xs font-medium leading-none">Remove Background</Label>
-            </div>
-
-            <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-x-2 p-3 justify-start items-center flex">
-              <Switch id="dashboard-posts-create" v-model="imagesZoomPan" class="scale-75" />
-              <Label for="dashboard-posts-create" class="text-xs font-medium leading-none">Zoom Pan</Label>
-            </div>
-
-            <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-x-2 p-3 justify-start items-center flex">
-              <Switch id="dashboard-posts-create" v-model="imagesGrayScale" class="scale-75" />
-              <Label for="dashboard-posts-create" class="text-xs font-medium leading-none">Grayscale</Label>
-            </div>
-            
-          </div>
+        <ResizablePanelGroup direction="horizontal" v-show="showModify">
         
-        </ResizablePanel>
+          <!-- Modify -->
+          <ResizablePanel :default-size="30">
 
-        <ResizableHandle with-handle v-show="showModify" />
-        <!-- Modify -->
-        <ResizablePanel v-show="showModify">
+            <div class="flex flex-col items-start justify-center gap-4 p-6">
 
-          <div class="flex flex-col items-center justify-center p-6 space-y-4">
-
-            <CldImage v-bind="attributes.effect" v-if="selectedImageModify" class="rounded-md" />
-
-            <div class="flex items-center justify-start w-full p-4 bg-white border-2 rounded-md cursor-pointer hover:border-black">
-              <Icon name="lucide:save" class="w-12 h-12 mr-2" /> 
-              <div class="flex flex-col">
-                <p class="text-lg">
-                  Save, modifications.
-                </p>
-                <p class="text-xs">
-                  Confirm edits to finalize changes.
+              <div class="flex flex-col p-3 rounded-md bg-slate-200 gap-y-2">
+                <p class="text-lg font-semibold">Filters & Effects</p>
+                <p class="text-sm text-muted-foreground">
+                  Elevate your images beyond the ordinary with premium effects that add depth, color, and emotion. ✨ #ImageEnhancement.
                 </p>
               </div>
-              <Icon name="lucide:chevron-right" class="w-6 h-6 ml-auto" /> 
-            </div>
 
-            <div class="flex items-center justify-start w-full p-4 bg-white border-2 rounded-md cursor-pointer hover:border-black" @click="clickMainAlbum">
-              <Icon name="lucide:album" class="w-12 h-12 mr-2" /> 
-              <div class="flex flex-col">
-                <p class="text-lg">
-                  Return, to album.
-                </p>
-                <p class="text-xs">
-                  Go back to your photo collection.
+              <div class="flex flex-wrap gap-2">
+
+                <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-y-2 p-3">
+                  <p class="text-sm">Opacity</p>
+                  <Slider
+                    v-model="imageOpacity"
+                    :max="100"
+                    :step="1"
+                    class="text-sm"
+                  />
+                  <p class="ml-auto text-sm">{{ imageOpacity?.[0] }}</p>
+                </div>
+
+                <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-y-2 p-3">
+                  <p class="text-sm">Blurr</p>
+                  <Slider
+                    v-model="imageBlurr"
+                    :max="1000"
+                    :step="100"
+                    class="text-sm"
+                  />
+                  <p class="ml-auto text-sm">{{ imageBlurr?.[0] }}</p>
+                </div>
+
+                <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-y-2 p-3">
+                  <p class="text-sm">Blurr Faces</p>
+                  <Slider
+                    v-model="imageBlurrFaces"
+                    :max="1000"
+                    :step="100"
+                    class="text-sm"
+                  />
+                  <p class="ml-auto text-sm">{{ imageBlurrFaces?.[0] }}</p>
+                </div>
+
+                <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-y-2 p-3">
+                  <p class="text-sm">Sharpen</p>
+                  <Slider
+                    v-model="imageSharpen"
+                    :max="1000"
+                    :step="100"
+                    class="text-sm"
+                  />
+                  <p class="ml-auto text-sm">{{ imageSharpen?.[0] }}</p>
+                </div>
+
+                <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-y-2 p-3">
+                  <p class="text-sm">Brightness</p>
+                  <Slider
+                    v-model="imagesBrightness"
+                    :max="100"
+                    :step="1"
+                    class="text-sm"
+                  />
+                  <p class="ml-auto text-sm">{{ imagesBrightness?.[0] }}</p>
+                </div>
+
+                <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-y-2 p-3">
+                  <p class="text-sm">Vibrance</p>
+                  <Slider
+                    v-model="imagesVibrance"
+                    :max="100"
+                    :step="1"
+                    class="text-sm"
+                  />
+                  <p class="ml-auto text-sm">{{ imagesVibrance?.[0] }}</p>
+                </div>
+
+                <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-y-2 p-3">
+                  <p class="text-sm">Angle</p>
+                  <Slider
+                    v-model="imagesAngle"
+                    :max="100"
+                    :step="1"
+                    class="text-sm"
+                  />
+                  <p class="ml-auto text-sm">{{ imagesAngle?.[0] }}</p>
+                </div>
+
+              </div>
+
+              <div class="flex flex-wrap gap-2">
+
+                <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-x-2 p-3 justify-start items-center flex">
+                  <Switch id="dashboard-posts-create" v-model="imagesRemoveBackground" class="scale-75" />
+                  <Label for="dashboard-posts-create" class="text-xs font-medium leading-none">Remove Background</Label>
+                </div>
+
+                <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-x-2 p-3 justify-start items-center flex">
+                  <Switch id="dashboard-posts-create" v-model="imagesZoomPan" class="scale-75" />
+                  <Label for="dashboard-posts-create" class="text-xs font-medium leading-none">Zoom Pan</Label>
+                </div>
+
+                <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-x-2 p-3 justify-start items-center flex">
+                  <Switch id="dashboard-posts-create" v-model="imagesGrayScale" class="scale-75" />
+                  <Label for="dashboard-posts-create" class="text-xs font-medium leading-none">Grayscale</Label>
+                </div>
+
+              </div>
+
+              <div class="flex flex-col p-3 rounded-md bg-slate-200 gap-y-2">
+                <p class="text-lg font-semibold">Content</p>
+                <p class="text-sm text-muted-foreground">
+                  Create with purpose. Every post, image, and word intentionally designed to deliver value. ✨ #ShortTitle.
                 </p>
               </div>
-              <Icon name="lucide:chevron-right" class="w-6 h-6 ml-auto" /> 
+
+              <div class="flex flex-wrap gap-2">
+
+                <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-y-2 p-3">
+                  <p class="text-sm">Text</p>
+                  <Input v-model="textContent" class="text-sm" />
+                </div>
+
+                <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-y-2 p-3">
+                  <p class="text-sm">Position X</p>
+                  <Slider
+                    v-model="textPositionX"
+                    :max="1000"
+                    :step="1"
+                    class="text-sm"
+                  />
+                  <p class="ml-auto text-sm">{{ textPositionX?.[0] }}</p>
+                </div>
+
+                <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-y-2 p-3">
+                  <p class="text-sm">Position Y</p>
+                  <Slider
+                    v-model="textPositionY"
+                    :max="1000"
+                    :step="1"
+                    class="text-sm"
+                  />
+                  <p class="ml-auto text-sm">{{ textPositionY?.[0] }}</p>
+                </div>
+
+                <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-y-2 p-3">
+                  <p class="text-sm">Font Size</p>
+                  <Slider
+                    v-model="textFontSize"
+                    :max="1000"
+                    :step="1"
+                    class="text-sm"
+                  />
+                  <p class="ml-auto text-sm">{{ textFontSize?.[0] }}</p>
+                </div>
+
+              </div>
+
+              <div class="flex flex-wrap gap-2">
+                <color-picker-block
+                  v-model="textColor"
+                  :withAlpha="true"
+                  :withInitialColor="true"
+                  :withEyeDropper="true"
+                  :withHexInput="true"
+                  :withRgbInput="true"
+                  :withColorsHistory="true"
+                  :immediateEmit="true"
+                  @change="console.log('New color:', $event)"
+                />
+              </div>
+              
+            </div>
+          
+          </ResizablePanel>
+
+          <ResizableHandle with-handle />
+          <!-- Modify -->
+          <ResizablePanel :default-size="14">
+
+            <div class="flex flex-col items-center justify-center p-6 space-y-4">
+
+              <CldImage v-bind="attributes.effect" v-if="selectedImageModify" class="rounded-md" />
+
+              <div class="flex items-center justify-start w-full p-4 bg-white border-2 rounded-md cursor-pointer hover:border-black">
+                <Icon name="lucide:save" class="w-12 h-12 mr-2" /> 
+                <div class="flex flex-col">
+                  <p class="text-lg">
+                    Save, modifications.
+                  </p>
+                  <p class="text-xs">
+                    Confirm edits to finalize changes.
+                  </p>
+                </div>
+                <Icon name="lucide:chevron-right" class="w-6 h-6 ml-auto" /> 
+              </div>
+
+              <div class="flex items-center justify-start w-full p-4 bg-white border-2 rounded-md cursor-pointer hover:border-black" @click="clickMainAlbum">
+                <Icon name="lucide:album" class="w-12 h-12 mr-2" /> 
+                <div class="flex flex-col">
+                  <p class="text-lg">
+                    Return, to album.
+                  </p>
+                  <p class="text-xs">
+                    Go back to your photo collection.
+                  </p>
+                </div>
+                <Icon name="lucide:chevron-right" class="w-6 h-6 ml-auto" /> 
+              </div>
+
             </div>
 
-          </div>
+          </ResizablePanel>
 
-        </ResizablePanel>
+        </ResizablePanelGroup>
 
         <!-- Upload -->
         <ResizablePanel v-show="showUpload">
 
           <div class="flex flex-col items-center justify-center p-6 space-y-4">
 
-            <div class="border-[1px] border-purple-400 rounded-md min-w-96 h-96 hover:border-purple-500 items-center justify-center flex bg-purple-50 w-full" v-if="selectedImages.length === 0">
+            <div class="border-[1px] border-purple-400 rounded-md min-w-96 h-96 hover:border-purple-500 items-center justify-center flex bg-purple-50 w-full hover:border-2" v-if="selectedImages.length === 0" v-show="!isUploading">
               <Icon name="lucide:image" class="w-12 h-12 text-gray-500" /> 
+            </div>
+            
+            <div class="flex flex-wrap gap-5" v-show="isUploading">
+              <div class="animate-pulse group" v-for="i in 16" :key="i">
+                <div class="w-20 h-20 border-2 rounded-md group-hover:border-purple-600 group-hover:border-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-full h-full" viewBox="0 0 24 24"><!-- Icon from SVG Spinners by Utkarsh Verma - https://github.com/n3r4zzurr0/svg-spinners/blob/main/LICENSE -->
+                    <rect width="7.33" height="7.33" x="1" y="1" fill="#888888">
+                      <animate id="svgSpinnersBlocksWave0" attributeName="x" begin="0;svgSpinnersBlocksWave1.end+0.2s" dur="0.6s" values="1;4;1"/>
+                      <animate attributeName="y" begin="0;svgSpinnersBlocksWave1.end+0.2s" dur="0.6s" values="1;4;1"/>
+                      <animate attributeName="width" begin="0;svgSpinnersBlocksWave1.end+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                      <animate attributeName="height" begin="0;svgSpinnersBlocksWave1.end+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                    </rect>
+                    <rect width="7.33" height="7.33" x="8.33" y="1" fill="#888888">
+                      <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="8.33;11.33;8.33"/>
+                      <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="1;4;1"/>
+                      <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="7.33;1.33;7.33"/>
+                      <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="7.33;1.33;7.33"/>
+                    </rect>
+                    <rect width="7.33" height="7.33" x="1" y="8.33" fill="#888888">
+                      <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="1;4;1"/>
+                      <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="8.33;11.33;8.33"/>
+                      <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="7.33;1.33;7.33"/>
+                      <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="7.33;1.33;7.33"/>
+                    </rect>
+                    <rect width="7.33" height="7.33" x="15.66" y="1" fill="#888888">
+                      <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="15.66;18.66;15.66"/>
+                      <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="1;4;1"/>
+                      <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                      <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                    </rect>
+                    <rect width="7.33" height="7.33" x="8.33" y="8.33" fill="#888888">
+                      <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="8.33;11.33;8.33"/>
+                      <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="8.33;11.33;8.33"/>
+                      <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                      <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                    </rect>
+                    <rect width="7.33" height="7.33" x="1" y="15.66" fill="#888888">
+                      <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="1;4;1"/>
+                      <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="15.66;18.66;15.66"/>
+                      <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                      <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                    </rect>
+                    <rect width="7.33" height="7.33" x="15.66" y="8.33" fill="#888888">
+                      <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="15.66;18.66;15.66"/>
+                      <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="8.33;11.33;8.33"/>
+                      <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="7.33;1.33;7.33"/>
+                      <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="7.33;1.33;7.33"/>
+                    </rect>
+                    <rect width="7.33" height="7.33" x="8.33" y="15.66" fill="#888888">
+                      <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="8.33;11.33;8.33"/>
+                      <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="15.66;18.66;15.66"/>
+                      <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="7.33;1.33;7.33"/>
+                      <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="7.33;1.33;7.33"/>
+                    </rect>
+                    <rect width="7.33" height="7.33" x="15.66" y="15.66" fill="#888888">
+                      <animate id="svgSpinnersBlocksWave1" attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.4s" dur="0.6s" values="15.66;18.66;15.66"/>
+                      <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.4s" dur="0.6s" values="15.66;18.66;15.66"/>
+                      <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.4s" dur="0.6s" values="7.33;1.33;7.33"/>
+                      <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.4s" dur="0.6s" values="7.33;1.33;7.33"/>
+                    </rect>
+                  </svg> 
+                </div>
+              </div>
             </div>
 
             <input 
@@ -497,7 +597,7 @@
               </div>
             </div>
 
-            <div class="flex items-center justify-start w-full p-4 border-[1px] rounded-md cursor-pointer hover:border-purple-500 border-purple-400 min-w-96 bg-purple-50" @click="triggerFileInput">
+            <div class="flex items-center justify-start w-full p-4 border-[1px] rounded-md cursor-pointer hover:border-purple-500 border-purple-400 min-w-96 bg-purple-50 hover:border-2" @click="triggerFileInput" v-show="!isUploading">
               <Icon name="lucide:image-plus" class="w-12 h-12 mr-2 text-gray-500" /> 
               <div class="flex flex-col">
                 <p class="text-lg text-muted-foreground">
@@ -510,7 +610,75 @@
               <Icon name="lucide:diamond-plus" class="w-6 h-6 ml-auto text-gray-500" /> 
             </div>
 
-            <div class="flex items-center justify-start w-full p-4 border-[1px] rounded-md cursor-pointer hover:border-blue-500 border-blue-400 min-w-96 bg-blue-50" @click="handleUploadPhoto">
+            <div class="flex items-center justify-start w-full p-4 border-2 border-purple-500 rounded-md cursor-pointer min-w-96 bg-purple-50" v-show="isUploading">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mr-2" viewBox="0 0 24 24"><!-- Icon from SVG Spinners by Utkarsh Verma - https://github.com/n3r4zzurr0/svg-spinners/blob/main/LICENSE -->
+                <rect width="7.33" height="7.33" x="1" y="1" fill="#888888">
+                  <animate id="svgSpinnersBlocksWave0" attributeName="x" begin="0;svgSpinnersBlocksWave1.end+0.2s" dur="0.6s" values="1;4;1"/>
+                  <animate attributeName="y" begin="0;svgSpinnersBlocksWave1.end+0.2s" dur="0.6s" values="1;4;1"/>
+                  <animate attributeName="width" begin="0;svgSpinnersBlocksWave1.end+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  <animate attributeName="height" begin="0;svgSpinnersBlocksWave1.end+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                </rect>
+                <rect width="7.33" height="7.33" x="8.33" y="1" fill="#888888">
+                  <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="8.33;11.33;8.33"/>
+                  <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="1;4;1"/>
+                  <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="7.33;1.33;7.33"/>
+                </rect>
+                <rect width="7.33" height="7.33" x="1" y="8.33" fill="#888888">
+                  <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="1;4;1"/>
+                  <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="8.33;11.33;8.33"/>
+                  <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="7.33;1.33;7.33"/>
+                </rect>
+                <rect width="7.33" height="7.33" x="15.66" y="1" fill="#888888">
+                  <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="15.66;18.66;15.66"/>
+                  <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="1;4;1"/>
+                  <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                </rect>
+                <rect width="7.33" height="7.33" x="8.33" y="8.33" fill="#888888">
+                  <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="8.33;11.33;8.33"/>
+                  <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="8.33;11.33;8.33"/>
+                  <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                </rect>
+                <rect width="7.33" height="7.33" x="1" y="15.66" fill="#888888">
+                  <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="1;4;1"/>
+                  <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="15.66;18.66;15.66"/>
+                  <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                </rect>
+                <rect width="7.33" height="7.33" x="15.66" y="8.33" fill="#888888">
+                  <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="15.66;18.66;15.66"/>
+                  <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="8.33;11.33;8.33"/>
+                  <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="7.33;1.33;7.33"/>
+                </rect>
+                <rect width="7.33" height="7.33" x="8.33" y="15.66" fill="#888888">
+                  <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="8.33;11.33;8.33"/>
+                  <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="15.66;18.66;15.66"/>
+                  <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="7.33;1.33;7.33"/>
+                </rect>
+                <rect width="7.33" height="7.33" x="15.66" y="15.66" fill="#888888">
+                  <animate id="svgSpinnersBlocksWave1" attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.4s" dur="0.6s" values="15.66;18.66;15.66"/>
+                  <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.4s" dur="0.6s" values="15.66;18.66;15.66"/>
+                  <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.4s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.4s" dur="0.6s" values="7.33;1.33;7.33"/>
+                </rect>
+              </svg> 
+              <div class="flex flex-col">
+                <p class="text-lg text-muted-foreground">
+                  Insert, additional images.
+                </p>
+                <p class="text-xs text-muted-foreground">
+                  Bring your daily post to life with new pictures.
+                </p>
+              </div>
+              <Icon name="lucide:diamond-plus" class="w-6 h-6 ml-auto text-gray-500" /> 
+            </div>
+
+            <div class="flex items-center justify-start w-full p-4 border-[1px] rounded-md cursor-pointer hover:border-blue-500 border-blue-400 min-w-96 bg-blue-50 hover:border-2" @click="handleUploadPhoto" v-show="!isUploading && selectedImages.length > 0">
               <Icon name="lucide:image-up" class="w-12 h-12 mr-2 text-gray-500" /> 
               <div class="flex flex-col">
                 <p class="text-lg text-muted-foreground">
@@ -523,8 +691,148 @@
               <Icon name="lucide:cloud-upload" class="w-6 h-6 ml-auto text-gray-500" /> 
             </div>
 
-            <div class="flex items-center justify-start w-full p-4 bg-white border-2 rounded-md cursor-pointer hover:border-black" @click="clickMainAlbum">
+            <div class="flex items-center justify-start w-full p-4 border-2 border-blue-500 rounded-md cursor-pointer min-w-96 bg-blue-50" v-show="isUploading">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mr-2" viewBox="0 0 24 24"><!-- Icon from SVG Spinners by Utkarsh Verma - https://github.com/n3r4zzurr0/svg-spinners/blob/main/LICENSE -->
+                <rect width="7.33" height="7.33" x="1" y="1" fill="#888888">
+                  <animate id="svgSpinnersBlocksWave0" attributeName="x" begin="0;svgSpinnersBlocksWave1.end+0.2s" dur="0.6s" values="1;4;1"/>
+                  <animate attributeName="y" begin="0;svgSpinnersBlocksWave1.end+0.2s" dur="0.6s" values="1;4;1"/>
+                  <animate attributeName="width" begin="0;svgSpinnersBlocksWave1.end+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  <animate attributeName="height" begin="0;svgSpinnersBlocksWave1.end+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                </rect>
+                <rect width="7.33" height="7.33" x="8.33" y="1" fill="#888888">
+                  <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="8.33;11.33;8.33"/>
+                  <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="1;4;1"/>
+                  <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="7.33;1.33;7.33"/>
+                </rect>
+                <rect width="7.33" height="7.33" x="1" y="8.33" fill="#888888">
+                  <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="1;4;1"/>
+                  <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="8.33;11.33;8.33"/>
+                  <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="7.33;1.33;7.33"/>
+                </rect>
+                <rect width="7.33" height="7.33" x="15.66" y="1" fill="#888888">
+                  <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="15.66;18.66;15.66"/>
+                  <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="1;4;1"/>
+                  <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                </rect>
+                <rect width="7.33" height="7.33" x="8.33" y="8.33" fill="#888888">
+                  <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="8.33;11.33;8.33"/>
+                  <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="8.33;11.33;8.33"/>
+                  <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                </rect>
+                <rect width="7.33" height="7.33" x="1" y="15.66" fill="#888888">
+                  <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="1;4;1"/>
+                  <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="15.66;18.66;15.66"/>
+                  <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                </rect>
+                <rect width="7.33" height="7.33" x="15.66" y="8.33" fill="#888888">
+                  <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="15.66;18.66;15.66"/>
+                  <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="8.33;11.33;8.33"/>
+                  <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="7.33;1.33;7.33"/>
+                </rect>
+                <rect width="7.33" height="7.33" x="8.33" y="15.66" fill="#888888">
+                  <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="8.33;11.33;8.33"/>
+                  <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="15.66;18.66;15.66"/>
+                  <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="7.33;1.33;7.33"/>
+                </rect>
+                <rect width="7.33" height="7.33" x="15.66" y="15.66" fill="#888888">
+                  <animate id="svgSpinnersBlocksWave1" attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.4s" dur="0.6s" values="15.66;18.66;15.66"/>
+                  <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.4s" dur="0.6s" values="15.66;18.66;15.66"/>
+                  <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.4s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.4s" dur="0.6s" values="7.33;1.33;7.33"/>
+                </rect>
+              </svg>  
+
+              <div class="flex flex-col">
+                <p class="text-lg text-muted-foreground">
+                  Upload, selected images.
+                </p>
+                <p class="text-xs text-muted-foreground">
+                  Diversify your photo collection.
+                </p>
+              </div>
+              <Icon name="lucide:cloud-upload" class="w-6 h-6 ml-auto text-gray-500" /> 
+            </div>
+
+            <div class="flex items-center justify-start w-full p-4 bg-white border-2 rounded-md cursor-pointer hover:border-black" @click="clickMainAlbum" v-show="!isUploading">
               <Icon name="lucide:album" class="w-12 h-12 mr-2" /> 
+              <div class="flex flex-col">
+                <p class="text-lg">
+                  Return, to album.
+                </p>
+                <p class="text-xs">
+                  Go back to your photo collection.
+                </p>
+              </div>
+              <Icon name="lucide:chevron-right" class="w-6 h-6 ml-auto" /> 
+            </div>
+
+            <div class="flex items-center justify-start w-full p-4 bg-white border-2 border-black rounded-md cursor-pointer" v-show="isUploading">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mr-2" viewBox="0 0 24 24"><!-- Icon from SVG Spinners by Utkarsh Verma - https://github.com/n3r4zzurr0/svg-spinners/blob/main/LICENSE -->
+                <rect width="7.33" height="7.33" x="1" y="1" fill="#888888">
+                  <animate id="svgSpinnersBlocksWave0" attributeName="x" begin="0;svgSpinnersBlocksWave1.end+0.2s" dur="0.6s" values="1;4;1"/>
+                  <animate attributeName="y" begin="0;svgSpinnersBlocksWave1.end+0.2s" dur="0.6s" values="1;4;1"/>
+                  <animate attributeName="width" begin="0;svgSpinnersBlocksWave1.end+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  <animate attributeName="height" begin="0;svgSpinnersBlocksWave1.end+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                </rect>
+                <rect width="7.33" height="7.33" x="8.33" y="1" fill="#888888">
+                  <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="8.33;11.33;8.33"/>
+                  <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="1;4;1"/>
+                  <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="7.33;1.33;7.33"/>
+                </rect>
+                <rect width="7.33" height="7.33" x="1" y="8.33" fill="#888888">
+                  <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="1;4;1"/>
+                  <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="8.33;11.33;8.33"/>
+                  <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="7.33;1.33;7.33"/>
+                </rect>
+                <rect width="7.33" height="7.33" x="15.66" y="1" fill="#888888">
+                  <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="15.66;18.66;15.66"/>
+                  <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="1;4;1"/>
+                  <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                </rect>
+                <rect width="7.33" height="7.33" x="8.33" y="8.33" fill="#888888">
+                  <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="8.33;11.33;8.33"/>
+                  <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="8.33;11.33;8.33"/>
+                  <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                </rect>
+                <rect width="7.33" height="7.33" x="1" y="15.66" fill="#888888">
+                  <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="1;4;1"/>
+                  <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="15.66;18.66;15.66"/>
+                  <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                </rect>
+                <rect width="7.33" height="7.33" x="15.66" y="8.33" fill="#888888">
+                  <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="15.66;18.66;15.66"/>
+                  <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="8.33;11.33;8.33"/>
+                  <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="7.33;1.33;7.33"/>
+                </rect>
+                <rect width="7.33" height="7.33" x="8.33" y="15.66" fill="#888888">
+                  <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="8.33;11.33;8.33"/>
+                  <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="15.66;18.66;15.66"/>
+                  <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="7.33;1.33;7.33"/>
+                </rect>
+                <rect width="7.33" height="7.33" x="15.66" y="15.66" fill="#888888">
+                  <animate id="svgSpinnersBlocksWave1" attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.4s" dur="0.6s" values="15.66;18.66;15.66"/>
+                  <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.4s" dur="0.6s" values="15.66;18.66;15.66"/>
+                  <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.4s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.4s" dur="0.6s" values="7.33;1.33;7.33"/>
+                </rect>
+              </svg>  
+
               <div class="flex flex-col">
                 <p class="text-lg">
                   Return, to album.
@@ -546,10 +854,9 @@
           <div class="flex flex-col space-y-4">
 
             <div class="flex flex-wrap items-center gap-2 justfiy-center">
-
-              <div class="w-24 h-24 border-[1px] border-gray-400 rounded-md cursor-pointer hover:border-purple-500" v-for="i in queryDailyData" :key="i">
+              <div v-for="i in queryDailyData" :key="i">
                 <Popover>
-                  <PopoverTrigger>
+                  <PopoverTrigger class="w-24 h-24 border-[1px] border-gray-400 rounded-md cursor-pointer hover:border-purple-500">
                     <NuxtImg :src="i.dailyurl" class="rounded-md border-[1px] w-full h-full"/>
                   </PopoverTrigger>
                   <PopoverContent class="flex flex-col space-y-2">
@@ -577,7 +884,6 @@
                   </PopoverContent>
                 </Popover>
               </div>
-
             </div>
 
             <div class="flex items-center justify-start w-full p-4 border-[1px] rounded-md cursor-pointer hover:border-blue-500 border-blue-400 min-w-96 bg-blue-50" @click="clickAlbumUpload">

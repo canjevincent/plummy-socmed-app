@@ -122,13 +122,32 @@ model PostLike {
 }
 
 model Daily {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  title String
-  dailyurl String
+  id                    String @id @default(auto()) @map("_id") @db.ObjectId
+  title                 String
+  dailyurl              String
 
-  userId     String @db.ObjectId
-  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  imageOpacity          String
+  imageBlur             String
+  imageBlurFace         String
+  imageSharpen          String
+  imageBrightness       String
+  imageVibrance         String
+  imageAngle            String
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  textContent           String
+  textPositionX         String
+  textPositionY         String
+  textFontSize          String
+  textColor             String
+
+  imageRemoveBackground Boolean
+  imageZoomPan          Boolean
+  imageGrayScale        Boolean
+  isMyDay               Boolean
+
+  userId                String @db.ObjectId
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 }
