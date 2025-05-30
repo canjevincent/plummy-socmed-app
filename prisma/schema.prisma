@@ -126,24 +126,24 @@ model Daily {
   title                 String
   dailyurl              String
 
-  imageOpacity          String
-  imageBlur             String
-  imageBlurFace         String
-  imageSharpen          String
-  imageBrightness       String
-  imageVibrance         String
-  imageAngle            String
+  imageOpacity          String?
+  imageBlur             String?
+  imageBlurFace         String?
+  imageSharpen          String?
+  imageBrightness       String?
+  imageVibrance         String?
+  imageAngle            String?
 
-  textContent           String
-  textPositionX         String
-  textPositionY         String
-  textFontSize          String
-  textColor             String
+  textContent           String?
+  textPositionX         String?
+  textPositionY         String?
+  textFontSize          String?
+  textColor             String?
 
-  imageRemoveBackground Boolean
-  imageZoomPan          Boolean
-  imageGrayScale        Boolean
-  isMyDay               Boolean
+  imageRemoveBackground Boolean @default(false)
+  imageZoomPan          Boolean @default(false)
+  imageGrayScale        Boolean @default(false)
+  isMyDay               Boolean @default(false)
 
   userId                String @db.ObjectId
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
