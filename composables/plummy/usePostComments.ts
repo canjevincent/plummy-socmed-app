@@ -5,7 +5,7 @@ export const useGetPostCommentsCount = (postId: Ref<string | undefined>) => {
     queryKey: ['post-comments-count', postId],
     queryFn: async () => {
       if (!postId.value) return { count: 0 }
-      const response = await $fetch<{ count: number }>(`/api/plummy/home/main/${postId.value}/commentCount`, {
+      const response = await $fetch<{ count: number }>(`/api/plummy/home/main/posts/${postId.value}/commentCount`, {
         method: 'GET'
       })
       return response
@@ -36,7 +36,7 @@ export const usePostComments = (postId: Ref<string | undefined>) => {
     queryKey: ['post-comments', postId],
     queryFn: async ({ pageParam = 0 }) => {
       if (!postId.value) return []
-      return await $fetch(`/api/plummy/home/main/${postId.value}/comment`, {
+      return await $fetch(`/api/plummy/home/main/posts/${postId.value}/comment`, {
         method: 'GET',
         params: { skip: pageParam, take: PAGE_SIZE }
       })

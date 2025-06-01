@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 
+  import { usePostSetDaily, usePostClearDaily } from '~/composables/plummy/useDailyMyDay';
   import { useToast } from '~/components/ui/toast';
   
   const { toast } = useToast();
@@ -126,27 +127,17 @@
     }
   });
 
-  // Modify Daily Image
-  
-  const selectedImageModify = ref<string>('');
-  const handleModifyImage = (image:string) => {
-    selectedImageModify.value = image;
-
-    showMain.value = false;
-    showAlbum.value = false;
-    showModify.value = true;
-    showUpload.value = false;
-  }
-
   // Modify attributes
+  const selectedImageModify = ref<string>('');
+  const selectedImageId = ref<string>('');
 
   const imageOpacity = ref([100])
-  const imageBlurr = ref([0]);
-  const imageBlurrFaces = ref([0]);
+  const imageBlur = ref([0]);
+  const imageBlurFace = ref([0]);
   const imageSharpen = ref([0]);
-  const imagesBrightness = ref([0]);
-  const imagesVibrance = ref([0]);
-  const imagesAngle = ref([0]);
+  const imageBrightness = ref([0]);
+  const imageVibrance = ref([0]);
+  const imageAngle = ref([0]);
 
   const textContent = ref('');
   const textPositionX = ref([5]);
@@ -154,9 +145,9 @@
   const textFontSize = ref([200]);
   const textColor = ref('#000');
 
-  const imagesRemoveBackground = ref(false);
-  const imagesZoomPan = ref(false);
-  const imagesGrayScale = ref(false);
+  const imageRemoveBackground = ref(false);
+  const imageZoomPan = ref(false);
+  const imageGrayScale = ref(false);
   
   const attributes = computed(() => ({
     effect: {
@@ -165,15 +156,15 @@
       width: "987",
       height: "987",
       opacity: imageOpacity.value[0].toString(),
-      blur: imageBlurr.value[0].toString(),
-      blurFaces: imageBlurrFaces.value[0].toString(),
+      blur: imageBlur.value[0].toString(),
+      blurFaces: imageBlurFace.value[0].toString(),
       sharpen: imageSharpen.value[0].toString(),
-      brightness: imagesBrightness.value[0].toString(),
-      vibrance: imagesVibrance.value[0].toString(),
-      angle: imagesAngle.value[0].toString(),
-      removeBackground: imagesRemoveBackground.value,
-      zoompan: imagesZoomPan.value,
-      grayscale: imagesGrayScale.value,
+      brightness: imageBrightness.value[0].toString(),
+      vibrance: imageVibrance.value[0].toString(),
+      angle: imageAngle.value[0].toString(),
+      removeBackground: imageRemoveBackground.value,
+      zoompan: imageZoomPan.value,
+      grayscale: imageGrayScale.value,
       overlays: [
         {
           position: {
@@ -192,10 +183,129 @@
     }
   }));
 
+  // Modify Daily Image
+  
+  const handleModifyImage = (
+    image: string,
+    imageId: string,
+    opacity: number,
+    blur: number,
+    blurFace: number,
+    sharpen: number,
+    brightness: number,
+    vibrance: number,
+    angle: number,
+    content: string,
+    positionX: number,
+    positionY: number,
+    fontSize: number,
+    color: string,
+    removeBackground: boolean,
+    zoomPan: boolean,
+    grayScale: boolean,
+  ) => {
+    selectedImageModify.value = image;
+    selectedImageId.value = imageId;
+    imageOpacity.value = [opacity];
+    imageBlur.value = [blur];
+    imageBlurFace.value = [blurFace];
+    imageSharpen.value = [sharpen];
+    imageBrightness.value = [brightness];
+    imageVibrance.value = [vibrance];
+    imageAngle.value = [angle];
+    textContent.value = content;
+    textPositionX.value = [positionX];
+    textPositionY.value = [positionY];
+    textFontSize.value = [fontSize];
+    textColor.value = color;
+    imageRemoveBackground.value = removeBackground;
+    imageZoomPan.value = zoomPan;
+    imageGrayScale.value = grayScale;
+    
+    showMain.value = false;
+    showAlbum.value = false;
+    showModify.value = true;
+    showUpload.value = false;
+  }
+
+  // Save Modifications
+
+  const handleSaveImageModifications = () => {
+
+    const imageModificationData = {
+      imageOpacity:imageOpacity.value[0].toString(),
+      imageBlur:imageBlur.value[0].toString(),
+      imageBlurFace:imageBlurFace.value[0].toString(),
+      imageSharpen:imageSharpen.value[0].toString(),
+      imageBrightness:imageBrightness.value[0].toString(),
+      imageVibrance:imageVibrance.value[0].toString(),
+      imageAngle:imageAngle.value[0].toString(),
+      textContent:textContent.value,
+      textPositionX:textPositionX.value[0].toString(),
+      textPositionY:textPositionY.value[0].toString(),
+      textFontSize:textFontSize.value[0].toString(),
+      textColor:textColor.value.toString(),
+      imageRemoveBackground:imageRemoveBackground.value,
+      imageZoomPan:imageZoomPan.value,
+      imageGrayScale:imageGrayScale.value
+    }
+
+    saveModification(imageModificationData);
+
+  }
+
+  const { mutate:saveModification, isPending:isSavingModification } = useMutation({
+    mutationFn: async (payload: any) => {
+      return await $fetch(`/api/plummy/home/main/dailies/${selectedImageId.value}/daily`, {
+        method: 'PATCH',
+        body: payload,
+      });
+    },
+    onSuccess: async () => {
+      
+      toast({
+        title: 'Images Modification Saved',
+        description: 'Images has been modified successfully.',
+      });
+
+      // Switch to album
+      clickMainAlbum();
+      // Refetch newly uploaded images
+      await refetchDaily();
+      // Clear the selected images
+      selectedImageModify.value = '';
+    },
+    onError: (error: any) => {
+
+      // Handle validation errors
+      if (error.data?.data?.errors) {
+        console.error('Validation errors:', error.data.data.errors);
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: Object.values(error.data.data.errors)[0] as string || 'Failed to create post',
+        });
+      } else {
+        // Handle generic errors
+        console.error('Post creation error:', error);
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'An unexpected error occurred. Please try again later.',
+        });
+      }
+      
+    }
+  });
+
   // Set Daily Image
   const selectedDailyImageSet = ref<string>('');
-  const handleDailyImageSet = (image:string) => {
+  const handleDailyImageSet = (image:string, imageId:string) => {
     selectedDailyImageSet.value = image;
+
+    const setImageMyDay = {
+      isMyDay:true
+    }
 
     showMain.value = true;
     showAlbum.value = false;
@@ -314,23 +424,23 @@
                 <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-y-2 p-3">
                   <p class="text-sm">Blurr</p>
                   <Slider
-                    v-model="imageBlurr"
+                    v-model="imageBlur"
                     :max="1000"
                     :step="100"
                     class="text-sm"
                   />
-                  <p class="ml-auto text-sm">{{ imageBlurr?.[0] }}</p>
+                  <p class="ml-auto text-sm">{{ imageBlur?.[0] }}</p>
                 </div>
 
                 <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-y-2 p-3">
                   <p class="text-sm">Blurr Faces</p>
                   <Slider
-                    v-model="imageBlurrFaces"
+                    v-model="imageBlurFace"
                     :max="1000"
                     :step="100"
                     class="text-sm"
                   />
-                  <p class="ml-auto text-sm">{{ imageBlurrFaces?.[0] }}</p>
+                  <p class="ml-auto text-sm">{{ imageBlurFace?.[0] }}</p>
                 </div>
 
                 <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-y-2 p-3">
@@ -347,34 +457,34 @@
                 <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-y-2 p-3">
                   <p class="text-sm">Brightness</p>
                   <Slider
-                    v-model="imagesBrightness"
+                    v-model="imageBrightness"
                     :max="100"
                     :step="1"
                     class="text-sm"
                   />
-                  <p class="ml-auto text-sm">{{ imagesBrightness?.[0] }}</p>
+                  <p class="ml-auto text-sm">{{ imageBrightness?.[0] }}</p>
                 </div>
 
                 <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-y-2 p-3">
                   <p class="text-sm">Vibrance</p>
                   <Slider
-                    v-model="imagesVibrance"
+                    v-model="imageVibrance"
                     :max="100"
                     :step="1"
                     class="text-sm"
                   />
-                  <p class="ml-auto text-sm">{{ imagesVibrance?.[0] }}</p>
+                  <p class="ml-auto text-sm">{{ imageVibrance?.[0] }}</p>
                 </div>
 
                 <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-y-2 p-3">
                   <p class="text-sm">Angle</p>
                   <Slider
-                    v-model="imagesAngle"
+                    v-model="imageAngle"
                     :max="100"
                     :step="1"
                     class="text-sm"
                   />
-                  <p class="ml-auto text-sm">{{ imagesAngle?.[0] }}</p>
+                  <p class="ml-auto text-sm">{{ imageAngle?.[0] }}</p>
                 </div>
 
               </div>
@@ -382,17 +492,17 @@
               <div class="flex flex-wrap gap-2">
 
                 <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-x-2 p-3 justify-start items-center flex">
-                  <Switch id="dashboard-posts-create" v-model="imagesRemoveBackground" class="scale-75" />
+                  <Switch id="dashboard-posts-create" v-model="imageRemoveBackground" class="scale-75" />
                   <Label for="dashboard-posts-create" class="text-xs font-medium leading-none">Remove Background</Label>
                 </div>
 
                 <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-x-2 p-3 justify-start items-center flex">
-                  <Switch id="dashboard-posts-create" v-model="imagesZoomPan" class="scale-75" />
+                  <Switch id="dashboard-posts-create" v-model="imageZoomPan" class="scale-75" />
                   <Label for="dashboard-posts-create" class="text-xs font-medium leading-none">Zoom Pan</Label>
                 </div>
 
                 <div class="h-auto border-[1px] border-gray-400 rounded-md cursor-pointer min-w-40 hover:border-purple-500 space-x-2 p-3 justify-start items-center flex">
-                  <Switch id="dashboard-posts-create" v-model="imagesGrayScale" class="scale-75" />
+                  <Switch id="dashboard-posts-create" v-model="imageGrayScale" class="scale-75" />
                   <Label for="dashboard-posts-create" class="text-xs font-medium leading-none">Grayscale</Label>
                 </div>
 
@@ -473,7 +583,7 @@
 
               <CldImage v-bind="attributes.effect" v-if="selectedImageModify" class="rounded-md" />
 
-              <div class="flex items-center justify-start w-full p-4 bg-white border-2 rounded-md cursor-pointer hover:border-black">
+              <div class="flex items-center justify-start w-full p-4 bg-white border-2 rounded-md cursor-pointer hover:border-black" @click="handleSaveImageModifications">
                 <Icon name="lucide:save" class="w-12 h-12 mr-2" /> 
                 <div class="flex flex-col">
                   <p class="text-lg">
@@ -860,14 +970,17 @@
                     <NuxtImg :src="i.dailyurl" class="rounded-md border-[1px] w-full h-full"/>
                   </PopoverTrigger>
                   <PopoverContent class="flex flex-col space-y-2">
-                    <div class="flex items-center justify-start w-full p-4 bg-white border-[1px] rounded-md cursor-pointer hover:border-purple-500 hover:border-2" @click="handleDailyImageSet(i.dailyurl)">
+                    <div class="flex items-center justify-start w-full p-4 bg-white border-[1px] rounded-md cursor-pointer hover:border-purple-500 hover:border-2" @click="handleDailyImageSet(i.dailyurl, i.id)">
                       <Icon name="lucide:image-play" class="w-6 h-6 mr-2" /> 
                       <p class="text-sm">
                         My Day
                       </p>
                       <Icon name="lucide:chevron-right" class="w-4 h-4 ml-auto" /> 
                     </div>
-                    <div class="flex items-center justify-start w-full p-4 bg-white border-[1px] rounded-md cursor-pointer hover:border-purple-500 hover:border-2" @click="handleModifyImage(i.dailyurl)">
+                    <div class="flex items-center justify-start w-full p-4 bg-white border-[1px] rounded-md cursor-pointer hover:border-purple-500 hover:border-2" 
+                        @click="handleModifyImage(i.dailyurl, i.id, i.imageOpacity, i.imageBlur, i.imageBlurFace, i.imageSharpen, i.imageBrightness, i.imageVibrance, 
+                                                  i.imageAngle, i.textContent, i.textPositionX, i.textPositionY, i.textFontSize, i.textColor, i.imageRemoveBackground, 
+                                                  i.imageZoomPan, i.imageGrayScale)">
                       <Icon name="lucide:images" class="w-6 h-6 mr-2" /> 
                       <p class="text-sm">
                         Modify

@@ -5,7 +5,7 @@ export const useGetPostLiked = (postId: Ref<string | undefined>) => {
     queryKey: ['check-post-liked', postId],
     queryFn: async () => {
       if (!postId.value) return null
-      const response = await $fetch(`/api/plummy/home/main/${postId.value}/likedPost`, {
+      const response = await $fetch(`/api/plummy/home/main/posts/${postId.value}/likedPost`, {
         method: 'GET',
       })
       return response || null // Ensure we always return null if response is undefined
@@ -29,7 +29,7 @@ export const useGetPostLikesCount = (postId: Ref<string | undefined>) => {
     queryKey: ['post-likes-count', postId],
     queryFn: async () => {
       if (!postId.value) return 0
-      return await $fetch(`/api/plummy/home/main/${postId.value}/likeCount`, {
+      return await $fetch(`/api/plummy/home/main/posts/${postId.value}/likeCount`, {
         method: 'GET'
       })
     },
@@ -88,7 +88,7 @@ export const usePostLikes = (postId: Ref<string | undefined>, emojiId?: Ref<stri
     queryKey: ['post-likes', postId, emojiId],
     queryFn: async ({ pageParam = 0}) => {
       if (!postId.value) return []
-      return await $fetch(`/api/plummy/home/main/${postId.value}/like`, {
+      return await $fetch(`/api/plummy/home/main/posts/${postId.value}/like`, {
         method: 'GET',
         params: { 
           skip: pageParam, 

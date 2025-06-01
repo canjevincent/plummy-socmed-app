@@ -83,7 +83,7 @@
 
   const { mutate: deleteLike, isPending: isDisliking } = useMutation({
     mutationFn: async(payload: any) => {
-      return await $fetch(`/api/plummy/home/main/${postId.value}/like`, {
+      return await $fetch(`/api/plummy/home/main/posts/${postId.value}/like`, {
         method: 'DELETE',
         body: payload
       });
