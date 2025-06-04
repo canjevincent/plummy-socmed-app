@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 
-  import { usePostSetDaily, usePostClearDaily } from '~/composables/plummy/useDailyMyDay';
+  import { usePostSetDaily, usePostClearDaily, usePostRemoveDaily } from '~/composables/plummy/useDailyMyDay';
+  import { useDeleteCloudinaryImage } from '~/composables/useCloudinary';
   import { useToast } from '~/components/ui/toast';
   
   const { toast } = useToast();
@@ -206,21 +207,21 @@
   ) => {
     selectedImageModify.value = image;
     selectedImageId.value = imageId;
-    imageOpacity.value = [opacity];
-    imageBlur.value = [blur];
-    imageBlurFace.value = [blurFace];
-    imageSharpen.value = [sharpen];
-    imageBrightness.value = [brightness];
-    imageVibrance.value = [vibrance];
-    imageAngle.value = [angle];
-    textContent.value = content;
-    textPositionX.value = [positionX];
-    textPositionY.value = [positionY];
-    textFontSize.value = [fontSize];
-    textColor.value = color;
-    imageRemoveBackground.value = removeBackground;
-    imageZoomPan.value = zoomPan;
-    imageGrayScale.value = grayScale;
+    imageOpacity.value = [opacity || 100];
+    imageBlur.value = [blur || 0];
+    imageBlurFace.value = [blurFace || 0];
+    imageSharpen.value = [sharpen || 0];
+    imageBrightness.value = [brightness || 0];
+    imageVibrance.value = [vibrance || 0];
+    imageAngle.value = [angle || 0];
+    textContent.value = content || '';
+    textPositionX.value = [positionX || 5];
+    textPositionY.value = [positionY || 5];
+    textFontSize.value = [fontSize || 200];
+    textColor.value = color || '#000';
+    imageRemoveBackground.value = removeBackground || false;
+    imageZoomPan.value = zoomPan || false;
+    imageGrayScale.value = grayScale || false;
     
     showMain.value = false;
     showAlbum.value = false;
@@ -233,21 +234,21 @@
   const handleSaveImageModifications = () => {
 
     const imageModificationData = {
-      imageOpacity:imageOpacity.value[0].toString(),
-      imageBlur:imageBlur.value[0].toString(),
-      imageBlurFace:imageBlurFace.value[0].toString(),
-      imageSharpen:imageSharpen.value[0].toString(),
-      imageBrightness:imageBrightness.value[0].toString(),
-      imageVibrance:imageVibrance.value[0].toString(),
-      imageAngle:imageAngle.value[0].toString(),
-      textContent:textContent.value,
-      textPositionX:textPositionX.value[0].toString(),
-      textPositionY:textPositionY.value[0].toString(),
-      textFontSize:textFontSize.value[0].toString(),
-      textColor:textColor.value.toString(),
-      imageRemoveBackground:imageRemoveBackground.value,
-      imageZoomPan:imageZoomPan.value,
-      imageGrayScale:imageGrayScale.value
+      imageOpacity: Number(imageOpacity.value[0]),
+      imageBlur: Number(imageBlur.value[0]),
+      imageBlurFace: Number(imageBlurFace.value[0]),
+      imageSharpen: Number(imageSharpen.value[0]),
+      imageBrightness: Number(imageBrightness.value[0]),
+      imageVibrance: Number(imageVibrance.value[0]),
+      imageAngle: Number(imageAngle.value[0]),
+      textContent: textContent.value,
+      textPositionX: Number(textPositionX.value[0]),
+      textPositionY: Number(textPositionY.value[0]),
+      textFontSize: Number(textFontSize.value[0]),
+      textColor: textColor.value,
+      imageRemoveBackground: imageRemoveBackground.value,
+      imageZoomPan: imageZoomPan.value,
+      imageGrayScale: imageGrayScale.value
     }
 
     saveModification(imageModificationData);
@@ -256,7 +257,7 @@
 
   const { mutate:saveModification, isPending:isSavingModification } = useMutation({
     mutationFn: async (payload: any) => {
-      return await $fetch(`/api/plummy/home/main/dailies/${selectedImageId.value}/daily`, {
+      return await $fetch(`/api/plummy/home/main/dailies/${selectedImageId.value}/modifyDaily`, {
         method: 'PATCH',
         body: payload,
       });
@@ -299,18 +300,79 @@
   });
 
   // Set Daily Image
+
+  const { 
+    setDaily,
+    isSettingDaily
+  } = usePostSetDaily(selectedImageId, refetchDaily)
+
   const selectedDailyImageSet = ref<string>('');
   const handleDailyImageSet = (image:string, imageId:string) => {
     selectedDailyImageSet.value = image;
+    selectedImageId.value = imageId;
 
     const setImageMyDay = {
       isMyDay:true
     }
 
+    setDaily(setImageMyDay)
+
     showMain.value = true;
     showAlbum.value = false;
     showModify.value = false;
     showUpload.value = false;
+  }
+
+  // Clear Daily Image
+
+  const { 
+    clearDaily,
+    isClearingDaily
+  } = usePostClearDaily(selectedImageId, refetchDaily)
+
+  const handleDailyImageClear = (imageId:string) => {
+    selectedImageId.value = imageId;
+    
+    const setImageMyDay = {
+      isMyDay:false
+    }
+
+    clearDaily(setImageMyDay)
+
+  }
+
+  // Remove Image
+  const selectedImageUrl = ref<string>('');
+
+  const {
+    deleteCloudinaryImage,
+    isDeletingCloudinaryImage
+  } = useDeleteCloudinaryImage(selectedImageUrl);
+
+  const { 
+    removeDaily,
+    isRemovingDaily
+  } = usePostRemoveDaily(selectedImageId, refetchDaily)
+
+  const handleDailyImageRemove = (imageId:string, imageUrl: string) => {
+    
+    const resourceName = getResourceName(imageUrl);
+    selectedImageUrl.value = resourceName as string;
+
+    const setImageMyDayCloudinaryDelete = {
+      url:selectedImageUrl
+    }
+
+    deleteCloudinaryImage(setImageMyDayCloudinaryDelete)
+
+    selectedImageId.value = imageId;
+    
+    const setImageMyDayDelete = {
+      id:imageId
+    }
+
+    removeDaily(setImageMyDayDelete)
+
   }
 
   // Display Phase
@@ -346,7 +408,7 @@
 
   <Dialog :open="isOpen" @update:open="emit('onClose')">
     <DialogContent 
-      class="max-h-[100vh] max-w-[115rem]"
+      class="max-h-[100vh] max-w-[100rem]"
      :class="{
       'h-[50rem] w-[30rem]': showMain === true && showAlbum === false && showModify === false || showUpload === true, // Open Main or Upload
       'h-[50rem] w-[500rem]': showMain === false && showAlbum === true && showModify === false && showUpload === false, // Open Album
@@ -583,8 +645,78 @@
 
               <CldImage v-bind="attributes.effect" v-if="selectedImageModify" class="rounded-md" />
 
-              <div class="flex items-center justify-start w-full p-4 bg-white border-2 rounded-md cursor-pointer hover:border-black" @click="handleSaveImageModifications">
+              <div class="flex items-center justify-start w-full p-4 bg-white border-2 rounded-md cursor-pointer hover:border-black" @click="handleSaveImageModifications" v-show="isSavingModification === false">
                 <Icon name="lucide:save" class="w-12 h-12 mr-2" /> 
+                <div class="flex flex-col">
+                  <p class="text-lg">
+                    Save, modifications.
+                  </p>
+                  <p class="text-xs">
+                    Confirm edits to finalize changes.
+                  </p>
+                </div>
+                <Icon name="lucide:chevron-right" class="w-6 h-6 ml-auto" /> 
+              </div>
+
+              <div class="flex items-center justify-start w-full p-4 bg-white border-2 border-black rounded-md cursor-pointer animate-pulse" v-show="isSavingModification === true">
+
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mr-2" viewBox="0 0 24 24"><!-- Icon from SVG Spinners by Utkarsh Verma - https://github.com/n3r4zzurr0/svg-spinners/blob/main/LICENSE -->
+                  <rect width="7.33" height="7.33" x="1" y="1" fill="#888888">
+                    <animate id="svgSpinnersBlocksWave0" attributeName="x" begin="0;svgSpinnersBlocksWave1.end+0.2s" dur="0.6s" values="1;4;1"/>
+                    <animate attributeName="y" begin="0;svgSpinnersBlocksWave1.end+0.2s" dur="0.6s" values="1;4;1"/>
+                    <animate attributeName="width" begin="0;svgSpinnersBlocksWave1.end+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                    <animate attributeName="height" begin="0;svgSpinnersBlocksWave1.end+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  </rect>
+                  <rect width="7.33" height="7.33" x="8.33" y="1" fill="#888888">
+                    <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="8.33;11.33;8.33"/>
+                    <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="1;4;1"/>
+                    <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="7.33;1.33;7.33"/>
+                    <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  </rect>
+                  <rect width="7.33" height="7.33" x="1" y="8.33" fill="#888888">
+                    <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="1;4;1"/>
+                    <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="8.33;11.33;8.33"/>
+                    <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="7.33;1.33;7.33"/>
+                    <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  </rect>
+                  <rect width="7.33" height="7.33" x="15.66" y="1" fill="#888888">
+                    <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="15.66;18.66;15.66"/>
+                    <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="1;4;1"/>
+                    <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                    <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  </rect>
+                  <rect width="7.33" height="7.33" x="8.33" y="8.33" fill="#888888">
+                    <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="8.33;11.33;8.33"/>
+                    <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="8.33;11.33;8.33"/>
+                    <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                    <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  </rect>
+                  <rect width="7.33" height="7.33" x="1" y="15.66" fill="#888888">
+                    <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="1;4;1"/>
+                    <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="15.66;18.66;15.66"/>
+                    <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                    <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  </rect>
+                  <rect width="7.33" height="7.33" x="15.66" y="8.33" fill="#888888">
+                    <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="15.66;18.66;15.66"/>
+                    <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="8.33;11.33;8.33"/>
+                    <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="7.33;1.33;7.33"/>
+                    <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  </rect>
+                  <rect width="7.33" height="7.33" x="8.33" y="15.66" fill="#888888">
+                    <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="8.33;11.33;8.33"/>
+                    <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="15.66;18.66;15.66"/>
+                    <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="7.33;1.33;7.33"/>
+                    <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  </rect>
+                  <rect width="7.33" height="7.33" x="15.66" y="15.66" fill="#888888">
+                    <animate id="svgSpinnersBlocksWave1" attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.4s" dur="0.6s" values="15.66;18.66;15.66"/>
+                    <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.4s" dur="0.6s" values="15.66;18.66;15.66"/>
+                    <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.4s" dur="0.6s" values="7.33;1.33;7.33"/>
+                    <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.4s" dur="0.6s" values="7.33;1.33;7.33"/>
+                  </rect>
+                </svg>  
+
                 <div class="flex flex-col">
                   <p class="text-lg">
                     Save, modifications.
@@ -626,7 +758,7 @@
             
             <div class="flex flex-wrap gap-5" v-show="isUploading">
               <div class="animate-pulse group" v-for="i in 16" :key="i">
-                <div class="w-20 h-20 border-2 rounded-md group-hover:border-purple-600 group-hover:border-2">
+                <div class="w-20 h-20 border-2 border-purple-600 rounded-md animate-pulse">
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-full h-full" viewBox="0 0 24 24"><!-- Icon from SVG Spinners by Utkarsh Verma - https://github.com/n3r4zzurr0/svg-spinners/blob/main/LICENSE -->
                     <rect width="7.33" height="7.33" x="1" y="1" fill="#888888">
                       <animate id="svgSpinnersBlocksWave0" attributeName="x" begin="0;svgSpinnersBlocksWave1.end+0.2s" dur="0.6s" values="1;4;1"/>
@@ -720,7 +852,7 @@
               <Icon name="lucide:diamond-plus" class="w-6 h-6 ml-auto text-gray-500" /> 
             </div>
 
-            <div class="flex items-center justify-start w-full p-4 border-2 border-purple-500 rounded-md cursor-pointer min-w-96 bg-purple-50" v-show="isUploading">
+            <div class="flex items-center justify-start w-full p-4 border-2 border-purple-500 rounded-md cursor-pointer min-w-96 bg-purple-50 animate-pulse" v-show="isUploading">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mr-2" viewBox="0 0 24 24"><!-- Icon from SVG Spinners by Utkarsh Verma - https://github.com/n3r4zzurr0/svg-spinners/blob/main/LICENSE -->
                 <rect width="7.33" height="7.33" x="1" y="1" fill="#888888">
                   <animate id="svgSpinnersBlocksWave0" attributeName="x" begin="0;svgSpinnersBlocksWave1.end+0.2s" dur="0.6s" values="1;4;1"/>
@@ -801,7 +933,7 @@
               <Icon name="lucide:cloud-upload" class="w-6 h-6 ml-auto text-gray-500" /> 
             </div>
 
-            <div class="flex items-center justify-start w-full p-4 border-2 border-blue-500 rounded-md cursor-pointer min-w-96 bg-blue-50" v-show="isUploading">
+            <div class="flex items-center justify-start w-full p-4 border-2 border-blue-500 rounded-md cursor-pointer min-w-96 bg-blue-50 animate-pulse" v-show="isUploading">
               
               <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mr-2" viewBox="0 0 24 24"><!-- Icon from SVG Spinners by Utkarsh Verma - https://github.com/n3r4zzurr0/svg-spinners/blob/main/LICENSE -->
                 <rect width="7.33" height="7.33" x="1" y="1" fill="#888888">
@@ -884,7 +1016,7 @@
               <Icon name="lucide:chevron-right" class="w-6 h-6 ml-auto" /> 
             </div>
 
-            <div class="flex items-center justify-start w-full p-4 bg-white border-2 border-black rounded-md cursor-pointer" v-show="isUploading">
+            <div class="flex items-center justify-start w-full p-4 bg-white border-2 border-black rounded-md cursor-pointer animate-pulse" v-show="isUploading">
               
               <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mr-2" viewBox="0 0 24 24"><!-- Icon from SVG Spinners by Utkarsh Verma - https://github.com/n3r4zzurr0/svg-spinners/blob/main/LICENSE -->
                 <rect width="7.33" height="7.33" x="1" y="1" fill="#888888">
@@ -964,19 +1096,31 @@
           <div class="flex flex-col space-y-4">
 
             <div class="flex flex-wrap items-center gap-2 justfiy-center">
-              <div v-for="i in queryDailyData" :key="i">
-                <Popover>
-                  <PopoverTrigger class="w-24 h-24 border-[1px] border-gray-400 rounded-md cursor-pointer hover:border-purple-500">
-                    <NuxtImg :src="i.dailyurl" class="rounded-md border-[1px] w-full h-full"/>
-                  </PopoverTrigger>
-                  <PopoverContent class="flex flex-col space-y-2">
-                    <div class="flex items-center justify-start w-full p-4 bg-white border-[1px] rounded-md cursor-pointer hover:border-purple-500 hover:border-2" @click="handleDailyImageSet(i.dailyurl, i.id)">
+              <div v-for="i in queryDailyData" :key="i" v-show="!isSettingDaily && !isClearingDaily && !isDeletingCloudinaryImage && !isRemovingDaily">
+                <HoverCard>
+                  <HoverCardTrigger  as-child>
+                    <div class="w-24 h-24 border-[1px] border-gray-400 rounded-md cursor-pointer hover:border-purple-500 hover:border-2">
+                      <NuxtImg :src="i.dailyurl" class="rounded-md border-[1px] w-full h-full"/>
+                    </div>
+                  </HoverCardTrigger>
+                  <HoverCardContent class="flex flex-col space-y-2">
+                    
+                    <div class="flex items-center justify-start w-full p-4 bg-white border-[1px] rounded-md cursor-pointer hover:border-purple-500 hover:border-2" @click="handleDailyImageSet(i.dailyurl, i.id)" v-show="i.isMyDay === false">
                       <Icon name="lucide:image-play" class="w-6 h-6 mr-2" /> 
                       <p class="text-sm">
                         My Day
                       </p>
                       <Icon name="lucide:chevron-right" class="w-4 h-4 ml-auto" /> 
                     </div>
+
+                    <div class="flex items-center justify-start w-full p-4 bg-white border-[1px] rounded-md cursor-pointer hover:border-purple-500 hover:border-2" @click="handleDailyImageClear(i.id)" v-show="i.isMyDay === true">
+                      <Icon name="lucide:image-play" class="w-6 h-6 mr-2" /> 
+                      <p class="text-sm">
+                        Clear My Day
+                      </p>
+                      <Icon name="lucide:chevron-right" class="w-4 h-4 ml-auto" /> 
+                    </div>
+
                     <div class="flex items-center justify-start w-full p-4 bg-white border-[1px] rounded-md cursor-pointer hover:border-purple-500 hover:border-2" 
                         @click="handleModifyImage(i.dailyurl, i.id, i.imageOpacity, i.imageBlur, i.imageBlurFace, i.imageSharpen, i.imageBrightness, i.imageVibrance, 
                                                   i.imageAngle, i.textContent, i.textPositionX, i.textPositionY, i.textFontSize, i.textColor, i.imageRemoveBackground, 
@@ -987,15 +1131,78 @@
                       </p>
                       <Icon name="lucide:chevron-right" class="w-4 h-4 ml-auto" /> 
                     </div>
-                    <div class="flex items-center justify-start w-full p-4 bg-white border-[1px] rounded-md cursor-pointer hover:border-purple-500 hover:border-2">
+
+                    <div class="flex items-center justify-start w-full p-4 bg-white border-[1px] rounded-md cursor-pointer hover:border-purple-500 hover:border-2" @click="handleDailyImageRemove(i.id, i.dailyurl)">
                       <Icon name="lucide:image-minus" class="w-6 h-6 mr-2" /> 
                       <p class="text-sm">
                         Remove
                       </p>
                       <Icon name="lucide:chevron-right" class="w-4 h-4 ml-auto" /> 
                     </div>
-                  </PopoverContent>
-                </Popover>
+                    
+                  </HoverCardContent>
+                </HoverCard>
+              </div>
+
+              <div v-for="i in queryDailyData" :key="i" v-show="isSettingDaily || isClearingDaily || isDeletingCloudinaryImage || isRemovingDaily">
+                <div class="w-24 h-24 border-[1px] border-gray-400 rounded-md cursor-pointer hover:border-purple-500 animate-pulse">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-full h-full" viewBox="0 0 24 24"><!-- Icon from SVG Spinners by Utkarsh Verma - https://github.com/n3r4zzurr0/svg-spinners/blob/main/LICENSE -->
+                    <rect width="7.33" height="7.33" x="1" y="1" fill="#888888">
+                      <animate id="svgSpinnersBlocksWave0" attributeName="x" begin="0;svgSpinnersBlocksWave1.end+0.2s" dur="0.6s" values="1;4;1"/>
+                      <animate attributeName="y" begin="0;svgSpinnersBlocksWave1.end+0.2s" dur="0.6s" values="1;4;1"/>
+                      <animate attributeName="width" begin="0;svgSpinnersBlocksWave1.end+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                      <animate attributeName="height" begin="0;svgSpinnersBlocksWave1.end+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                    </rect>
+                    <rect width="7.33" height="7.33" x="8.33" y="1" fill="#888888">
+                      <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="8.33;11.33;8.33"/>
+                      <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="1;4;1"/>
+                      <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="7.33;1.33;7.33"/>
+                      <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="7.33;1.33;7.33"/>
+                    </rect>
+                    <rect width="7.33" height="7.33" x="1" y="8.33" fill="#888888">
+                      <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="1;4;1"/>
+                      <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="8.33;11.33;8.33"/>
+                      <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="7.33;1.33;7.33"/>
+                      <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.1s" dur="0.6s" values="7.33;1.33;7.33"/>
+                    </rect>
+                    <rect width="7.33" height="7.33" x="15.66" y="1" fill="#888888">
+                      <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="15.66;18.66;15.66"/>
+                      <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="1;4;1"/>
+                      <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                      <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                    </rect>
+                    <rect width="7.33" height="7.33" x="8.33" y="8.33" fill="#888888">
+                      <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="8.33;11.33;8.33"/>
+                      <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="8.33;11.33;8.33"/>
+                      <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                      <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                    </rect>
+                    <rect width="7.33" height="7.33" x="1" y="15.66" fill="#888888">
+                      <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="1;4;1"/>
+                      <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="15.66;18.66;15.66"/>
+                      <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                      <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.2s" dur="0.6s" values="7.33;1.33;7.33"/>
+                    </rect>
+                    <rect width="7.33" height="7.33" x="15.66" y="8.33" fill="#888888">
+                      <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="15.66;18.66;15.66"/>
+                      <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="8.33;11.33;8.33"/>
+                      <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="7.33;1.33;7.33"/>
+                      <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="7.33;1.33;7.33"/>
+                    </rect>
+                    <rect width="7.33" height="7.33" x="8.33" y="15.66" fill="#888888">
+                      <animate attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="8.33;11.33;8.33"/>
+                      <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="15.66;18.66;15.66"/>
+                      <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="7.33;1.33;7.33"/>
+                      <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.3s" dur="0.6s" values="7.33;1.33;7.33"/>
+                    </rect>
+                    <rect width="7.33" height="7.33" x="15.66" y="15.66" fill="#888888">
+                      <animate id="svgSpinnersBlocksWave1" attributeName="x" begin="svgSpinnersBlocksWave0.begin+0.4s" dur="0.6s" values="15.66;18.66;15.66"/>
+                      <animate attributeName="y" begin="svgSpinnersBlocksWave0.begin+0.4s" dur="0.6s" values="15.66;18.66;15.66"/>
+                      <animate attributeName="width" begin="svgSpinnersBlocksWave0.begin+0.4s" dur="0.6s" values="7.33;1.33;7.33"/>
+                      <animate attributeName="height" begin="svgSpinnersBlocksWave0.begin+0.4s" dur="0.6s" values="7.33;1.33;7.33"/>
+                    </rect>
+                  </svg> 
+                </div>
               </div>
             </div>
 

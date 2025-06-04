@@ -124,7 +124,7 @@ model PostLike {
 model Daily {
   id                    String @id @default(auto()) @map("_id") @db.ObjectId
   title                 String
-  dailyurl              String
+  dailyUrl              String
 
   imageOpacity          String?
   imageBlur             String?

@@ -1,5 +1,7 @@
 <script lang="ts" setup>
 
+  import { useUserFeaturedDaily, useMemberFeaturedDaily } from '~/composables/plummy/useDailyMyDay';
+
   const isCreateDailyVisible = ref(false);
   
   const openCreateDailyCardModal = () => {
@@ -9,6 +11,20 @@
   const closeCreatePostModal = () => {
     isCreateDailyVisible.value = false;
   };
+
+  const { 
+    featuredDaily:userFeaturedDaily, 
+    isLoading:userFeatureIsLoading, 
+    error:userFeatureError, 
+    refetch:userFeatureRefetch 
+  } = useUserFeaturedDaily();
+
+  // const { 
+  //   featuredDaily:memberFeaturedDaily, 
+  //   isLoading:memberFeatureIsLoading, 
+  //   error:memberFeatureError, 
+  //   refetch:memberFeatureRefetch 
+  // } = useMemberFeaturedDaily();
 
 </script>
 
@@ -20,13 +36,12 @@
           
           <div class="absolute w-10 h-10 border-2 border-white rounded-full shadow-sm top-2 left-2 group-hover:ring-2 group-hover:ring-purple-500">
             <NuxtImg 
-              src="https://avatars.githubusercontent.com/u/41053951" 
+              :src="userFeaturedDaily || 'https://avatars.githubusercontent.com/u/41053951'" 
               alt="Sarah Johnson" 
               class="object-cover w-full h-full rounded-full cursor-pointer"
             />
           </div>
-
-          <NuxtImg src="https://avatars.githubusercontent.com/u/41053952" alt="Sarah Johnson" class="w-full h-full rounded-md" />
+          <NuxtImg :src="userFeaturedDaily || 'https://avatars.githubusercontent.com/u/41053951'" alt="Sarah Johnson" class="w-full h-full rounded-md" />
         </div>
       </div>
 
