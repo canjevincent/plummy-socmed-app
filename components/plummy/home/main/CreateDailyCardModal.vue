@@ -1100,12 +1100,12 @@
                 <HoverCard>
                   <HoverCardTrigger  as-child>
                     <div class="w-24 h-24 border-[1px] border-gray-400 rounded-md cursor-pointer hover:border-purple-500 hover:border-2">
-                      <NuxtImg :src="i.dailyurl" class="rounded-md border-[1px] w-full h-full"/>
+                      <NuxtImg :src="i.dailyUrl" class="rounded-md border-[1px] w-full h-full"/>
                     </div>
                   </HoverCardTrigger>
                   <HoverCardContent class="flex flex-col space-y-2">
                     
-                    <div class="flex items-center justify-start w-full p-4 bg-white border-[1px] rounded-md cursor-pointer hover:border-purple-500 hover:border-2" @click="handleDailyImageSet(i.dailyurl, i.id)" v-show="i.isMyDay === false">
+                    <div class="flex items-center justify-start w-full p-4 bg-white border-[1px] rounded-md cursor-pointer hover:border-purple-500 hover:border-2" @click="handleDailyImageSet(i.dailyUrl, i.id)" v-show="i.isMyDay === false">
                       <Icon name="lucide:image-play" class="w-6 h-6 mr-2" /> 
                       <p class="text-sm">
                         My Day
@@ -1122,7 +1122,7 @@
                     </div>
 
                     <div class="flex items-center justify-start w-full p-4 bg-white border-[1px] rounded-md cursor-pointer hover:border-purple-500 hover:border-2" 
-                        @click="handleModifyImage(i.dailyurl, i.id, i.imageOpacity, i.imageBlur, i.imageBlurFace, i.imageSharpen, i.imageBrightness, i.imageVibrance, 
+                        @click="handleModifyImage(i.dailyUrl, i.id, i.imageOpacity, i.imageBlur, i.imageBlurFace, i.imageSharpen, i.imageBrightness, i.imageVibrance, 
                                                   i.imageAngle, i.textContent, i.textPositionX, i.textPositionY, i.textFontSize, i.textColor, i.imageRemoveBackground, 
                                                   i.imageZoomPan, i.imageGrayScale)">
                       <Icon name="lucide:images" class="w-6 h-6 mr-2" /> 
@@ -1132,7 +1132,7 @@
                       <Icon name="lucide:chevron-right" class="w-4 h-4 ml-auto" /> 
                     </div>
 
-                    <div class="flex items-center justify-start w-full p-4 bg-white border-[1px] rounded-md cursor-pointer hover:border-purple-500 hover:border-2" @click="handleDailyImageRemove(i.id, i.dailyurl)">
+                    <div class="flex items-center justify-start w-full p-4 bg-white border-[1px] rounded-md cursor-pointer hover:border-purple-500 hover:border-2" @click="handleDailyImageRemove(i.id, i.dailyUrl)">
                       <Icon name="lucide:image-minus" class="w-6 h-6 mr-2" /> 
                       <p class="text-sm">
                         Remove

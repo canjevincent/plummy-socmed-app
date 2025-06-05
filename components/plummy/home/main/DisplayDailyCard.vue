@@ -32,16 +32,19 @@
   <section class="flex justify-between h-full gap-x-2">
 
       <div class="group" @click="openCreateDailyCardModal">
-        <div class="relative flex items-center justify-center w-auto h-full border-2 rounded-md shadow-sm cursor-pointer bg-muted/50 group-hover:shadow-md group-hover:border-purple-500">
+        <div class="relative flex items-center justify-center w-40 h-full p-2 bg-purple-200 border-2 rounded-md shadow-sm cursor-pointer bg-muted/50 group-hover:shadow-md group-hover:border-purple-500">
           
           <div class="absolute w-10 h-10 border-2 border-white rounded-full shadow-sm top-2 left-2 group-hover:ring-2 group-hover:ring-purple-500">
             <NuxtImg 
-              :src="userFeaturedDaily || 'https://avatars.githubusercontent.com/u/41053951'" 
+              :src="userFeaturedDaily?.avatarUrl || 'https://avatars.githubusercontent.com/u/41053951'" 
               alt="Sarah Johnson" 
               class="object-cover w-full h-full rounded-full cursor-pointer"
             />
           </div>
-          <NuxtImg :src="userFeaturedDaily || 'https://avatars.githubusercontent.com/u/41053951'" alt="Sarah Johnson" class="w-full h-full rounded-md" />
+          <NuxtImg :src="userFeaturedDaily?.dailyUrl || 'https://avatars.githubusercontent.com/u/41053951'" alt="Sarah Johnson" class="w-full h-full rounded-md" />
+          <p class="absolute text-sm font-bold text-white bottom-8">
+            My Daily
+          </p>
         </div>
       </div>
 

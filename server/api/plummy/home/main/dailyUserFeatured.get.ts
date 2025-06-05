@@ -9,19 +9,22 @@ export default defineEventHandler(async (event) => {
 
     if (session.user) {
       const daily = await prisma.daily.findFirst({
-        where:{
-          userId:session.user.id,
-          isMyDay: true
+        where: {
+          userId: session.user.id,
+          isMyDay: true,
         },
-        include:{
-          user:{
+        select: {
+          dailyUrl: true,
+          user: {
             select: {
-              avatarUrl: true
-            }
-          }
-        }
-      })
-      return { dailyUrl:daily.dailyUrl, avatarUrl:daily.avatarUrl }
+              avatarUrl: true,
+            },
+          },
+        },
+      });
+      
+      return { dailyUrl:daily?.dailyUrl, avatarUrl:daily?.user?.avatarUrl || null }
+
     } else {
       throw createError({
         statusCode: 401,

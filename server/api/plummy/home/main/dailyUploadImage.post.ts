@@ -37,7 +37,7 @@ export default defineEventHandler(async (event) => {
         return prisma.daily.create({
           data: {
             title: image.title,
-            dailyurl: uploadResult.secure_url,
+            dailyUrl: uploadResult.secure_url,
             userId: userId
           }
         });

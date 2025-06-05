@@ -19,7 +19,7 @@ export const useUserFeaturedDaily = () => {
     }
   });
 
-  const featuredDaily = computed(() => data.value?.dailyurl || null);
+  const featuredDaily = computed(() => data.value || null);
 
   return {
     featuredDaily,
@@ -42,7 +42,7 @@ export const useMemberFeaturedDaily = () => {
 
   console.log("Check featured member: ", data);
 
-  const featuredDaily = computed(() => data.value?.dailyurl || null);
+  const featuredDaily = null;
 
   return {
     featuredDaily,
