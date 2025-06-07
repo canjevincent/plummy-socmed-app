@@ -8,14 +8,36 @@ export default defineEventHandler(async (event) => {
   try {
 
     if (session.user) {
+      // Get pagination parameters from query
+      const query = getQuery(event);
+      const skip = parseInt(query.skip as string) || 0;
+      const take = parseInt(query.take as string) || 5;
+
       const daily = await prisma.daily.findMany({
-        where:{
-          userId:{
-            not:session.user.id
+        where: {
+          userId: {
+            not: session.user.id
           },
           isMyDay: true
-        }
-      })
+        },
+        select: {
+          id: true,
+          dailyUrl: true,
+          user: {
+            select: {
+              avatarUrl: true,
+              firstName: true,
+              lastName: true
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc'
+        },
+        skip,
+        take
+      });
+      
       return daily
     } else {
       throw createError({

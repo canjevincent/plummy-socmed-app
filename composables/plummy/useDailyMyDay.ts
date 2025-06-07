@@ -1,18 +1,26 @@
-import { useQuery, useMutation } from "@tanstack/vue-query";
+import { useQuery, useMutation, useInfiniteQuery } from "@tanstack/vue-query";
 import { useToast } from "~/components/ui/toast";
 
 const { toast } = useToast();
 
-interface DailyResponse {
+interface UserDailyResponse {
   dailyUrl: string | null;
   avatarUrl: string | null;
 }
 
+interface MemberDailyResponse {
+  id: string;
+  dailyUrl: string | null;
+  user: {
+    avatarUrl: string | null;
+  };
+}
+
 export const useUserFeaturedDaily = () => {
-  const { data, isLoading, error, refetch } = useQuery<DailyResponse>({
+  const { data, isLoading, error, refetch } = useQuery<UserDailyResponse>({
     queryKey: ['user-daily-featured'],
     queryFn: async () => {
-      const response = await $fetch<DailyResponse>('/api/plummy/home/main/dailyUserFeatured', {
+      const response = await $fetch<UserDailyResponse>('/api/plummy/home/main/dailyUserFeatured', {
         method:'GET'
       })
       return response || null;
@@ -30,22 +38,41 @@ export const useUserFeaturedDaily = () => {
 }
 
 export const useMemberFeaturedDaily = () => {
-  const { data, isLoading, error, refetch } = useQuery<DailyResponse>({
+  const PAGE_SIZE = 5
+
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    error,
+    refetch
+  } = useInfiniteQuery({
     queryKey: ['member-daily-featured'],
-    queryFn: async () => {
-      const response = await $fetch<DailyResponse>('/api/plummy/home/main/dailyMemberFeatured', {
-        method:'GET'
+    queryFn: async ({ pageParam = 0 }) => {
+      const response = await $fetch('/api/plummy/home/main/dailyMemberFeatured', {
+        method: 'GET',
+        params: { skip: pageParam, take: PAGE_SIZE }
       })
-      return response || null;
-    }
+      return response || [];
+    },
+    getNextPageParam: (lastPage, allPages) => {
+      if (!lastPage || lastPage.length < PAGE_SIZE) return undefined
+      return allPages.length * PAGE_SIZE
+    },
+    initialPageParam: 0
   });
 
-  console.log("Check featured member: ", data);
-
-  const featuredDaily = null;
+  const featuredDaily = computed(() => {
+    return data.value?.pages.flat() || []
+  });
 
   return {
     featuredDaily,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
     isLoading,
     error,
     refetch
