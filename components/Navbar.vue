@@ -50,14 +50,16 @@
         <div class="fixed inset-0 z-50" />
         <div class="fixed inset-y-0 right-0 z-50 w-full px-6 py-6 overflow-y-auto bg-white sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
           <div class="flex items-center justify-between">
-            <!-- <a href="#" class="p-1.5 -m-1.5">
+            <!-- 
+            <a href="#" class="p-1.5 -m-1.5">
               <span class="sr-only">Your Company</span>
               <NuxtImg class="w-auto h-10 rounded-md" src="/plummy-logo.png" alt="" />
             </a>
             <button type="button" class="p-2.5 -m-2.5 text-gray-700 rounded-md" @click="mobileMenuOpen = false">
               <span class="sr-only">Close menu</span>
               <Icon name="lucide:x" class="size-6" />
-            </button> -->
+            </button> 
+            -->
             <client-only>
                 <Vue3Lottie
                   :animationData="jitterlogoblack"
